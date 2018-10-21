@@ -1,0 +1,20 @@
+{
+  "name": "seedlink",
+  "author": "Jeremy Mallette",
+  "license": "MIT",
+  "version": "0.0.0",
+  "description": "IoT Platform for custom greenhouse solutions.",
+  "private": true,
+  "scripts": {
+    "start": "nodejs .app.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "cookie-parser": "~1.4.3",
+    "cors": "^2.8.4",
+    "express": "^4.16.2",
+    "mongoose": "^4.13.7",
+    "morgan": "^1.9.0",
+    "path": "^0.12.7"
+  }
+}
