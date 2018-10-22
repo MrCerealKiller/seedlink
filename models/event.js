@@ -2,22 +2,23 @@
  * @file Model for Devices as stored on the database
  * @author Jeremy Mallette
  * @version 0.0.0
- * @module Models/Event
+ * @module Models/SectorEvent
  */
 
 // Imports ---------------------------------------------------------------------
 const mongoose  = require('mongoose');
-const db        = require('../config/database.js');
 
 // Create Models ---------------------------------------------------------------
 const eventSchema = mongoose.Schema({
   sector: {
-    type: String,
-    required: true,
+    type: Schema.Types.ObjectId,
+    ref: 'OutputSector',
+    required: true
   },
   tag: {
     type: String,
     required: true,
+    trim: true,
     unique: true,
     dropDups: true
   },
@@ -41,52 +42,52 @@ const eventSchema = mongoose.Schema({
   }
 }, {timestamps: true});
 
-const Event = module.exports = mongoose.model('Event', eventSchema);
+const SectorEvent = module.exports = mongoose.model('SectorEvent', eventSchema);
 
-// Get Events ------------------------------------------------------------------
-module.exports.getEventById = function(id, callback) {
-  Event.findById(id, callback);
+// Get SectorEvents ------------------------------------------------------------
+module.exports.getSectorEventById = function(id, callback) {
+  SectorEvent.findById(id, callback);
 };
 
-module.exports.getDeviceByTag = function(tag, callback) {
+module.exports.getSectorEventByTag = function(tag, callback) {
   var query = {tag: tag};
-  Event.findOne(query, callback);
+  SectorEvent.findOne(query, callback);
 };
 
-module.exports.getSectorEvents = function(sector, callback) {
+module.exports.getSectorsEvents = function(sector, callback) {
   var query = {sector: sector};
-  Event.find(query, callback);
+  SectorEvent.find(query, callback);
 }
 
-// Add Event -------------------------------------------------------------------
-module.exports.addEvent = function(ev, callback) {
-  ev.save(callback);
+// Add SectorEvent -------------------------------------------------------------
+module.exports.addSectorEvent = function(sectorEvent, callback) {
+  sectorEvent.save(callback);
 };
 
-// Update Event ----------------------------------------------------------------
- module.exports.updateEvent = function(ev, callback) {
-  Event.findById(ev._id, function(err, dbEvent) {
+// Update SectorEvent ----------------------------------------------------------
+ module.exports.updateSectorEvent = function(sectorEvent, callback) {
+  SectorEvent.findById(sectorEvent._id, function(err, dbSectorEvent) {
     if (err) {
       throw err;
     }
 
-    dbEvent.sector = ev.sector;
-    dbEvent.tag = ev.cid;
-    dbEvent.start = ev.start;
-    dbEvent.duration = ev.duration;
-    dbEvent.interval = ev.interval;
+    dbSectorEvent.sector = sectorEvent.sector;
+    dbSectorEvent.tag = sectorEvent.tag;
+    dbSectorEvent.start = sectorEvent.start;
+    dbSectorEvent.duration = sectorEvent.duration;
+    dbSectorEvent.interval = sectorEvent.interval;
 
-    dbEvent.save(callback);
+    dbSectorEvent.save(callback);
   });
 };
 
-// Remove Event ----------------------------------------------------------------
-module.exports.removeEventById = function(id, callback) {
-  Event.findById(id, function(err, ev) {
+// Remove SectorEvent ----------------------------------------------------------
+module.exports.removeSectorEventById = function(id, callback) {
+  SectorEvent.findById(id, function(err, sectorEvent) {
     if (err) {
       throw err;
     }
 
-    ev.remove(callback);
+    sectorEvent.remove(callback);
   });
 };
