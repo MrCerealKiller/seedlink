@@ -11,6 +11,7 @@ node_modules
 docs
 public
 bin
+package-lock.json
 
 ## IDEs and Editors
 /.idea
