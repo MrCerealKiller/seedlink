@@ -1,8 +1,8 @@
 /**
-* @file Model for Devices as stored on the database
+* @file Model for Output Sectors as stored on the database
 * @author Jeremy Mallette
 * @version 0.0.0
-* @module Models/Event
+* @module Models/OutputSector
 */
 
 // Imports ---------------------------------------------------------------------
@@ -16,6 +16,11 @@ const oSectorSchema = mongoose.Schema({
     trim: true,
     unique: true,
     dropDups: true
+  },
+  system: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'System',
+    required: true
   },
   type: {
     type: String,
@@ -36,7 +41,7 @@ const oSectorSchema = mongoose.Schema({
     max: [54, 'Even an Arduino Mega doesn\'t have that many pins...']
   },
   events: [{
-    type: Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'SectorEvent'
   }]
 }, {timestamps: true});
@@ -71,6 +76,7 @@ module.exports.updateOSector = function(sector, callback) {
     }
 
     dbSector.name = sector.name;
+    dbSector.system = sector.system;
     dbSector.type = sector.type;
     dbSector.key = sector.key;
     dbSector.events = sector.events;

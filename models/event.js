@@ -1,5 +1,5 @@
 /**
- * @file Model for Devices as stored on the database
+ * @file Model for Output Events as stored on the database
  * @author Jeremy Mallette
  * @version 0.0.0
  * @module Models/SectorEvent
@@ -11,7 +11,7 @@ const mongoose  = require('mongoose');
 // Create Models ---------------------------------------------------------------
 const eventSchema = mongoose.Schema({
   sector: {
-    type: Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'OutputSector',
     required: true
   },
