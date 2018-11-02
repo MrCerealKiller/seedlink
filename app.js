@@ -15,7 +15,9 @@ const _PORT_PRODUCTION = 80;
 
 // Imports ---------------------------------------------------------------------
 const express       = require('express');
+const bodyParser    = require('body-parser');
 const cookieParser  = require('cookie-parser');
+const cors          = require('cors');
 const logger        = require('morgan');
 const mongoose      = require('mongoose');
 const path          = require('path');
@@ -23,7 +25,7 @@ const path          = require('path');
 // Local Modules ---------------------------------------------------------------
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
-const db          = require('./config/database.js');
+const db          = require('./config/database');
 
 // Paths -----------------------------------------------------------------------
 var staticPath = path.join(__dirname, 'public');
