@@ -7,6 +7,7 @@
 
 // Imports ---------------------------------------------------------------------
 const mongoose  = require('mongoose');
+const System    = require('./system');
 
 // Create Models ---------------------------------------------------------------
 const iSectorSchema = mongoose.Schema({
@@ -38,7 +39,9 @@ const iSectorSchema = mongoose.Schema({
     type: Number,
     required: true,
     min: [0, 'The key must be 0 or higher'],
-    max: [54, 'Even an Arduino Mega doesn\'t have that many pins...']
+    max: [54, 'Even an Arduino Mega doesn\'t have that many pins...'],
+    unique: true,
+    dropDups: true
   },
   overrideThresh: {
     type: Number,
@@ -69,7 +72,34 @@ module.exports.getSectorsByType = function(type, callback) {
 
 // Add Event -------------------------------------------------------------------
 module.exports.addISector = function(sector, callback) {
-  sector.save(callback);
+  sector.save(function(err, sector) {
+    if (err) {
+      callback(err, null);
+      return;
+    }
+
+    var callbackErr = false;
+
+    // Add the id to the system input sectors
+    ISector.findOne(sector).populate('system').exec(function(err, sector) {
+      if (err || sector == null || sector == undefined) {
+        callbackErr = true;
+      }
+
+      sector.system.inputSectors.push(sector._id);
+      sector.system.save(function(err, system) {
+        if (err) {
+          callbackErr = true;
+        }
+      });
+    });
+
+    if (callbackErr) {
+      callback(new Error('could not link sector to system'), null);
+    } else {
+      callback(null, sector);
+    }
+  });
 };
 
 // Update Event ----------------------------------------------------------------
@@ -80,7 +110,6 @@ module.exports.updateISector = function(sector, callback) {
     }
 
     dbSector.name = sector.name;
-    dbSector.system = sector.system;
     dbSector.type = sector.type;
     dbSector.key = sector.key;
     dbSector.overrideThresh = sector.overrideThresh;
@@ -91,6 +120,42 @@ module.exports.updateISector = function(sector, callback) {
 };
 
 // Remove Event ----------------------------------------------------------------
+module.exports.detachISectorById = function(id, callback) {
+  ISector.getISectorById(id, function(err, sector) {
+    if (err) {
+      throw err;
+    }
+
+    var callbackErr = false;
+
+    // Remove the sector from the system input sector array
+    ISector.findOne(sector).populate('system').exec(function(err, sector) {
+      if (err || sector == null || sector == undefined) {
+        callbackErr = true;
+        return;
+      }
+
+      var idx = sector.system.inputSectors.indexOf(sector._id);
+      if (idx > -1) {
+        sector.system.inputSectors.splice(idx, 1);
+        sector.system.save(function(err, system) {
+          if (err) {
+            callbackErr = true;
+          }
+        });
+      } else {
+        callbackErr = true;
+      }
+    });
+
+    if (callbackErr) {
+      callback(new Error('could not delete sector from system'), null);
+    } else {
+      callback(null, sector);
+    }
+  });
+};
+
 module.exports.removeISectorById = function(id, callback) {
   ISector.findById(id, function(err, sector) {
     if (err) {

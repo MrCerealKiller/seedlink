@@ -17,6 +17,7 @@ const ISector   = require('../models/isector');
 const OSector   = require('../models/osector');
 const Event     = require('../models/event');
 
+// System ----------------------------------------------------------------------
 router.route('/system')
   .get(function(req, res, next) {
     getSystem(req,res);
@@ -73,8 +74,10 @@ function addSystem(req, res) {
   var newSystem = new System({
     name: req.body.name,
     passcode: req.body.passcode,
-    inputPorts: req.body.inputPorts,
-    outputPorts: req.body.outputPorts,
+    inputPort: req.body.inputPort,
+    inputSectors: req.body.inputSectors,
+    outputPort: req.body.outputPort,
+    outputSectors: req.body.outputSectors,
     tempWarning: req.body.tempWarning,
     tempCritical: req.body.tempCritical,
     humidityWarning: req.body.humidityWarning,
@@ -82,7 +85,7 @@ function addSystem(req, res) {
     pHWarning: req.body.pHWarning,
     pHCritical: req.body.pHCritical,
     waterLevelWarning: req.body.waterLevelWarning,
-    waterLevelCritical: req.body.waterLevelCritical,
+    waterLevelCritical: req.body.waterLevelCritical
   });
 
   System.addSystem(newSystem, function(err, system) {
@@ -105,8 +108,10 @@ function updateSystem(req, res) {
     _id: req.body._id,
     name: req.body.name,
     passcode: req.body.passcode,
-    inputPorts: req.body.inputPorts,
-    outputPorts: req.body.outputPorts,
+    inputPort: req.body.inputPort,
+    inputSectors: req.body.inputSectors,
+    outputPort: req.body.outputPort,
+    outputSectors: req.body.outputSectors,
     tempWarning: req.body.tempWarning,
     tempCritical: req.body.tempCritical,
     humidityWarning: req.body.humidityWarning,
@@ -114,7 +119,7 @@ function updateSystem(req, res) {
     pHWarning: req.body.pHWarning,
     pHCritical: req.body.pHCritical,
     waterLevelWarning: req.body.waterLevelWarning,
-    waterLevelCritical: req.body.waterLevelCritical,
+    waterLevelCritical: req.body.waterLevelCritical
   });
 
   System.updateSystem(update, function(err, system) {
@@ -145,6 +150,126 @@ function deleteSystem(req, res) {
       res.json({
         success: true,
         msg: system.name + ' was deleted'
+      });
+    }
+  });
+}
+
+// Input Sectors ---------------------------------------------------------------
+router.route('/system/input')
+  .get(function(req, res, next) {
+    getInputSector(req,res);
+  })
+  .post(function(req, res, next) {
+    addInputSector(req, res);
+  })
+  .put(function(req, res, next) {
+    updateInputSector(req, res);
+  })
+  .delete(function(req, res, next) {
+    deleteInputSector(req, res);
+  });
+
+function getInputSector(req, res) {
+  var id = req.headers.id;
+
+  if (id != null && id != undefined && id != "") {
+    ISector.getISectorById(id, function(err, sector) {
+      if (err || sector == null) {
+        res.json({
+          success: false,
+          msg: ('Could not retrieve the input sector. Error: ' + err),
+          sector: undefined
+        });
+      } else {
+        res.json({
+          success: true,
+          msg: 'Retrieved the requested input sector',
+          sector: sector
+        });
+      }
+    });
+  } else {
+    res.json({
+      success: false,
+      msg: ('This request requires a valid ID'),
+      systems: undefined
+    });
+  }
+}
+
+function addInputSector(req, res) {
+  var newSector = new ISector({
+    name: req.body.name,
+    system: req.body.system,
+    type: req.body.type,
+    key: req.body.key,
+    overrideThresh: req.body.overrideThresh,
+    oSectors: req.body.oSectors
+  });
+
+  ISector.addISector(newSector, function(err, sector) {
+    if (err || sector == null) {
+      res.json({
+        success: false,
+        msg: 'Could not save the sector. Error: ' + err
+      });
+    } else {
+      res.json({
+        success: true,
+        msg: sector.name + ' was saved.'
+      });
+    }
+  });
+}
+
+function updateInputSector(req, res) {
+  var update = new ISector({
+    _id: req.body._id,
+    name: req.body.name,
+    type: req.body.type,
+    key: req.body.key,
+    overrideThresh: req.body.overrideThresh,
+    oSectors: req.body.oSectors
+  });
+
+  ISector.updateISector(update, function(err, sector) {
+    if (err || sector == null) {
+      res.json({
+        success: false,
+        msg: 'Could not save changes. Error: ' + err
+      });
+    } else {
+      res.json({
+        success: true,
+        msg: sector.name + ' was saved'
+      });
+    }
+  });
+}
+
+function deleteInputSector(req, res) {
+  var id = req.headers.id;
+
+  ISector.detachISectorById(id, function(err, sector) {
+    if (err || sector == null) {
+      res.json({
+        success: false,
+        msg: 'Could not detach the input sector. Error: ' + err
+      });
+    } else {
+      ISector.removeISectorById(id, function(err, sector) {
+        if (err || sector == null) {
+          res.json({
+            success: false,
+            msg: 'Could not delete input sector. Error: ' + err
+          });
+        } else {
+          res.json({
+            success: true,
+            msg: sector.name + ' was deleted'
+          });
+        }
       });
     }
   });

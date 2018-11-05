@@ -7,8 +7,8 @@
 
 // Imports ---------------------------------------------------------------------
 const mongoose  = require('mongoose');
-const inputSector = require('./isector');
-const outputSector = require('./osector');
+const InputSector = require('./isector');
+const OutputSector = require('./osector');
 
 // Create Models ---------------------------------------------------------------
 const systemSchema = mongoose.Schema({
@@ -24,23 +24,23 @@ const systemSchema = mongoose.Schema({
     required: true,
     trim: true,
   },
-  inputPorts: [{
+  inputPort: {
     type: String,
     required: true,
-    trim: true,
-    sectors: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'InputSector'
-    }]
+    trim: true
+  },
+  inputSectors: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'InputSector'
   }],
-  outputPorts: [{
+  outputPort: {
     type: String,
     required: true,
-    trim: true,
-    sectors: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'OutputSector'
-    }]
+    trim: true
+  },
+  outputSectors: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'OutputSector'
   }],
   tempWarning: {
     type: Number
@@ -98,8 +98,10 @@ module.exports.updateSystem = function(system, callback) {
 
     dbSystem.name = system.name;
     dbSystem.passcode = system.passcode;
-    dbSystem.inputPorts = system.inputPorts;
-    dbSystem.outputPorts = system.outputPorts;
+    dbSystem.inputPort = system.inputPort;
+    dbSystem.inputSectors = system.inputSectors;
+    dbSystem.outputPort = system.outputPort;
+    dbSystem.outputSectors = system.outputSectors
     dbSystem.tempWarning = system.tempWarning;
     dbSystem.tempCritical = system.tempCritical;
     dbSystem.humidityWarning = system.humidityWarning;
@@ -126,24 +128,20 @@ module.exports.removeSystemById = function(id, callback) {
     }
 
     // Remove all of the children input sectors
-      system.inputPorts.forEach(function(port) {
-        port.sectors.forEach(function(sector) {
-          inputSector.removeISectorById(sector, function(err) {
-            if (err) {
-              throw err;
-            }
-          });
-        });
+    system.inputSectors.forEach(function(sector) {
+      InputSector.removeISectorById(sector, function(err) {
+        if (err) {
+          throw err;
+        }
       });
+    });
 
     // Remove all of the children output sectors
-    system.outputPorts.forEach(function(port) {
-      port.sectors.forEach(function(sector) {
-        inputSector.removeISectorById(sector, function(err) {
-          if (err) {
-            throw err;
-          }
-        });
+    system.outputSectors.forEach(function(sector) {
+      OutputSector.removeOSectorById(sector, function(err) {
+        if (err) {
+          throw err;
+        }
       });
     });
 
