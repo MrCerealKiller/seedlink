@@ -9,7 +9,7 @@
 const mongoose  = require('mongoose');
 
 // Create Models ---------------------------------------------------------------
-const eventSchema = mongoose.Schema({
+const oEventSchema = mongoose.Schema({
   sector: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'OutputSector',
@@ -42,36 +42,35 @@ const eventSchema = mongoose.Schema({
   }
 }, {timestamps: true});
 
-const SectorEvent = module.exports = mongoose.model('SectorEvent', eventSchema);
+const OSectorEvent = module.exports = mongoose.model('OSectorEvent', oEventSchema);
 
 // Get SectorEvents ------------------------------------------------------------
-module.exports.getSectorEventById = function(id, callback) {
+module.exports.getOSectorEventById = function(id, callback) {
   SectorEvent.findById(id, callback);
 };
 
-module.exports.getSectorEventByTag = function(tag, callback) {
+module.exports.getOSectorEventByTag = function(tag, callback) {
   var query = {tag: tag};
   SectorEvent.findOne(query, callback);
 };
 
-module.exports.getSectorsEvents = function(sector, callback) {
+module.exports.getOSectorsEvents = function(sector, callback) {
   var query = {sector: sector};
   SectorEvent.find(query, callback);
 }
 
 // Add SectorEvent -------------------------------------------------------------
-module.exports.addSectorEvent = function(sectorEvent, callback) {
+module.exports.addOSectorEvent = function(sectorEvent, callback) {
   sectorEvent.save(callback);
 };
 
 // Update SectorEvent ----------------------------------------------------------
- module.exports.updateSectorEvent = function(sectorEvent, callback) {
+ module.exports.updateOSectorEvent = function(sectorEvent, callback) {
   SectorEvent.findById(sectorEvent._id, function(err, dbSectorEvent) {
     if (err) {
       throw err;
     }
 
-    dbSectorEvent.sector = sectorEvent.sector;
     dbSectorEvent.tag = sectorEvent.tag;
     dbSectorEvent.start = sectorEvent.start;
     dbSectorEvent.duration = sectorEvent.duration;
@@ -82,7 +81,7 @@ module.exports.addSectorEvent = function(sectorEvent, callback) {
 };
 
 // Remove SectorEvent ----------------------------------------------------------
-module.exports.removeSectorEventById = function(id, callback) {
+module.exports.removeOSectorEventById = function(id, callback) {
   SectorEvent.findById(id, function(err, sectorEvent) {
     if (err) {
       throw err;

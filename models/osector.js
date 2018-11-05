@@ -6,7 +6,9 @@
 */
 
 // Imports ---------------------------------------------------------------------
-const mongoose  = require('mongoose');
+const mongoose = require('mongoose');
+const System   = require('./system');
+const OEvent   = require('./oevent'); 
 
 // Create Models ---------------------------------------------------------------
 const oSectorSchema = mongoose.Schema({
@@ -38,11 +40,13 @@ const oSectorSchema = mongoose.Schema({
     type: Number,
     required: true,
     min: [0, 'The key must be 0 or higher'],
-    max: [54, 'Even an Arduino Mega doesn\'t have that many pins...']
+    max: [54, 'Even an Arduino Mega doesn\'t have that many pins...'],
+    unique: true,
+    dropDups: true
   },
   events: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'SectorEvent'
+    ref: 'OSectorEvent'
   }]
 }, {timestamps: true});
 
@@ -76,7 +80,6 @@ module.exports.updateOSector = function(sector, callback) {
     }
 
     dbSector.name = sector.name;
-    dbSector.system = sector.system;
     dbSector.type = sector.type;
     dbSector.key = sector.key;
     dbSector.events = sector.events;
@@ -86,6 +89,42 @@ module.exports.updateOSector = function(sector, callback) {
 };
 
 // Remove Event ----------------------------------------------------------------
+module.exports.detachOSectorById = function(id, callback) {
+  OSector.getOSectorById(id, function(err, sector) {
+    if (err) {
+      throw err;
+    }
+
+    var callbackErr = false;
+
+    // Remove the sector from the system input sector array
+    ISector.findOne(sector).populate('system').exec(function(err, sector) {
+      if (err || sector == null || sector == undefined) {
+        callbackErr = true;
+        return;
+      }
+
+      var idx = sector.system.inputSectors.indexOf(sector._id);
+      if (idx > -1) {
+        sector.system.inputSectors.splice(idx, 1);
+        sector.system.save(function(err, system) {
+          if (err) {
+            callbackErr = true;
+          }
+        });
+      } else {
+        callbackErr = true;
+      }
+    });
+
+    if (callbackErr) {
+      callback(new Error('could not delete sector from system'), null);
+    } else {
+      callback(null, sector);
+    }
+  });
+};
+
 module.exports.removeOSectorById = function(id, callback) {
   OSector.findById(id, function(err, sector) {
     if (err) {

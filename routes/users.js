@@ -15,7 +15,7 @@ const db_config = require('../config/database.js');
 const System    = require('../models/system');
 const ISector   = require('../models/isector');
 const OSector   = require('../models/osector');
-const Event     = require('../models/event');
+const Event     = require('../models/oevent');
 
 // System ----------------------------------------------------------------------
 router.route('/system')
