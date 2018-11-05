@@ -70,7 +70,7 @@ module.exports.getSectorsByType = function(type, callback) {
 // Add Event -------------------------------------------------------------------
 module.exports.addISector = function(sector, callback) {
   sector.save(function(err, sector) {
-    if (err) {
+    if (err || sector == null) {
       callback(err, null);
       return;
     }
@@ -102,8 +102,9 @@ module.exports.addISector = function(sector, callback) {
 // Update Event ----------------------------------------------------------------
 module.exports.updateISector = function(sector, callback) {
   ISector.findById(sector._id, function(err, dbSector) {
-    if (err) {
-      throw err;
+    if (err || dbSector == null) {
+      callback(err, null);
+      return;
     }
 
     dbSector.name = sector.name;
@@ -118,15 +119,16 @@ module.exports.updateISector = function(sector, callback) {
 // Remove Event ----------------------------------------------------------------
 module.exports.detachISectorById = function(id, callback) {
   ISector.getISectorById(id, function(err, sector) {
-    if (err) {
-      throw err;
+    if (err || sector == null) {
+      callback(err, null);
+      return;
     }
 
     var callbackErr = false;
 
     // Remove the sector from the system input sector array
     ISector.findOne(sector).populate('system').exec(function(err, sector) {
-      if (err || sector == null || sector == undefined) {
+      if (err || sector == null) {
         callbackErr = true;
         return;
       }

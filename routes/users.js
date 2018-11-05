@@ -204,8 +204,7 @@ function addInputSector(req, res) {
     system: req.body.system,
     type: req.body.type,
     key: req.body.key,
-    overrideThresh: req.body.overrideThresh,
-    oSectors: req.body.oSectors
+    iEvents: req.body.iEvents
   });
 
   ISector.addISector(newSector, function(err, sector) {
@@ -229,8 +228,7 @@ function updateInputSector(req, res) {
     name: req.body.name,
     type: req.body.type,
     key: req.body.key,
-    overrideThresh: req.body.overrideThresh,
-    oSectors: req.body.oSectors
+    iEvents: req.body.iEvents
   });
 
   ISector.updateISector(update, function(err, sector) {
@@ -263,6 +261,124 @@ function deleteInputSector(req, res) {
           res.json({
             success: false,
             msg: 'Could not delete input sector. Error: ' + err
+          });
+        } else {
+          res.json({
+            success: true,
+            msg: sector.name + ' was deleted'
+          });
+        }
+      });
+    }
+  });
+}
+
+// Output Sectors --------------------------------------------------------------
+router.route('/system/output')
+  .get(function(req, res, next) {
+    getOutputSector(req,res);
+  })
+  .post(function(req, res, next) {
+    addOutputSector(req, res);
+  })
+  .put(function(req, res, next) {
+    updateOutputSector(req, res);
+  })
+  .delete(function(req, res, next) {
+    deleteOutputSector(req, res);
+  });
+
+function getOutputSector(req, res) {
+  var id = req.headers.id;
+
+  if (id != null && id != undefined && id != "") {
+    OSector.getOSectorById(id, function(err, sector) {
+      if (err || sector == null) {
+        res.json({
+          success: false,
+          msg: ('Could not retrieve the output sector. Error: ' + err),
+          sector: undefined
+        });
+      } else {
+        res.json({
+          success: true,
+          msg: 'Retrieved the requested output sector',
+          sector: sector
+        });
+      }
+    });
+  } else {
+    res.json({
+      success: false,
+      msg: ('This request requires a valid ID'),
+      systems: undefined
+    });
+  }
+}
+
+function addOutputSector(req, res) {
+  var newSector = new OSector({
+    name: req.body.name,
+    system: req.body.system,
+    type: req.body.type,
+    key: req.body.key,
+    oEvents: req.body.oEvents
+  });
+
+  OSector.addOSector(newSector, function(err, sector) {
+    if (err || sector == null) {
+      res.json({
+        success: false,
+        msg: 'Could not save the sector. Error: ' + err
+      });
+    } else {
+      res.json({
+        success: true,
+        msg: sector.name + ' was saved.'
+      });
+    }
+  });
+}
+
+function updateOutputSector(req, res) {
+  var update = new OSector({
+    _id: req.body._id,
+    name: req.body.name,
+    type: req.body.type,
+    key: req.body.key,
+    oEvents: req.body.oEvents
+  });
+
+  OSector.updateOSector(update, function(err, sector) {
+    if (err || sector == null) {
+      res.json({
+        success: false,
+        msg: 'Could not save changes. Error: ' + err
+      });
+    } else {
+      res.json({
+        success: true,
+        msg: sector.name + ' was saved'
+      });
+    }
+  });
+}
+
+function deleteOutputSector(req, res) {
+  var id = req.headers.id;
+
+  OSector.detachOSectorById(id, function(err, sector) {
+    if (err || sector == null) {
+      res.json({
+        success: false,
+        msg: 'Could not detach the output sector. Error: ' + err
+      });
+    } else {
+      OSector.removeOSectorById(id, function(err, sector) {
+        if (err || sector == null) {
+          res.json({
+            success: false,
+            msg: 'Could not delete output sector. Error: ' + err
           });
         } else {
           res.json({

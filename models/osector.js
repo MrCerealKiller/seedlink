@@ -44,7 +44,7 @@ const oSectorSchema = mongoose.Schema({
     unique: true,
     dropDups: true
   },
-  events: [{
+  oEvents: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'OutputEvent'
   }]
@@ -69,7 +69,33 @@ module.exports.getSectorsByType = function(type, callback) {
 
 // Add Event -------------------------------------------------------------------
 module.exports.addOSector = function(sector, callback) {
-  sector.save(callback);
+  sector.save(function(err, sector) {
+    if (err) {
+      throw err;
+    }
+
+    var callbackErr = false;
+
+    // Add the id to the system input sectors
+    OSector.findOne(sector).populate('system').exec(function(err, sector) {
+      if (err || sector == null || sector == undefined) {
+        callbackErr = true;
+      }
+
+      sector.system.outputSectors.push(sector._id);
+      sector.system.save(function(err, system) {
+        if (err) {
+          callbackErr = true;
+        }
+      });
+    });
+
+    if (callbackErr) {
+      callback(new Error('could not link sector to system'), null);
+    } else {
+      callback(null, sector);
+    }
+  });
 };
 
 // Update Event ----------------------------------------------------------------
@@ -98,15 +124,14 @@ module.exports.detachOSectorById = function(id, callback) {
     var callbackErr = false;
 
     // Remove the sector from the system input sector array
-    ISector.findOne(sector).populate('system').exec(function(err, sector) {
-      if (err || sector == null || sector == undefined) {
-        callbackErr = true;
-        return;
+    OSector.findOne(sector).populate('system').exec(function(err, sector) {
+      if (err) {
+        throw err;
       }
 
-      var idx = sector.system.inputSectors.indexOf(sector._id);
+      var idx = sector.system.outputSectors.indexOf(sector._id);
       if (idx > -1) {
-        sector.system.inputSectors.splice(idx, 1);
+        sector.system.outputSectors.splice(idx, 1);
         sector.system.save(function(err, system) {
           if (err) {
             callbackErr = true;
