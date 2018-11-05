@@ -8,7 +8,7 @@
 // Imports ---------------------------------------------------------------------
 const mongoose = require('mongoose');
 const System   = require('./system');
-const OEvent   = require('./oevent'); 
+const OEvent   = require('./oevent');
 
 // Create Models ---------------------------------------------------------------
 const oSectorSchema = mongoose.Schema({
@@ -46,7 +46,7 @@ const oSectorSchema = mongoose.Schema({
   },
   events: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'OSectorEvent'
+    ref: 'OutputEvent'
   }]
 }, {timestamps: true});
 
@@ -82,7 +82,7 @@ module.exports.updateOSector = function(sector, callback) {
     dbSector.name = sector.name;
     dbSector.type = sector.type;
     dbSector.key = sector.key;
-    dbSector.events = sector.events;
+    dbSector.oEvents = sector.oEvents;
 
     dbSector.save(callback);
   });

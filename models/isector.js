@@ -8,6 +8,7 @@
 // Imports ---------------------------------------------------------------------
 const mongoose  = require('mongoose');
 const System    = require('./system');
+const IEvent    = require('./ievent');
 
 // Create Models ---------------------------------------------------------------
 const iSectorSchema = mongoose.Schema({
@@ -43,13 +44,9 @@ const iSectorSchema = mongoose.Schema({
     unique: true,
     dropDups: true
   },
-  overrideThresh: {
-    type: Number,
-    required: false
-  },
-  oSectors: [{
+  iEvents: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'OutputSector'
+    ref: 'InputEvent'
   }]
 }, {timestamps: true});
 
@@ -112,8 +109,7 @@ module.exports.updateISector = function(sector, callback) {
     dbSector.name = sector.name;
     dbSector.type = sector.type;
     dbSector.key = sector.key;
-    dbSector.overrideThresh = sector.overrideThresh;
-    dbSector.oSectors = sector.oSectors;
+    dbSector.iEvents = sector.iEvents;
 
     dbSector.save(callback);
   });
@@ -161,6 +157,15 @@ module.exports.removeISectorById = function(id, callback) {
     if (err) {
       throw err;
     }
+
+    // Remove all of the child events
+    sector.iEvents.forEach(function(iEvent) {
+      IEvent.removeIEventById(iEvent, function(err) {
+        if (err) {
+          throw err;
+        }
+      });
+    });
 
     sector.remove(callback);
   });

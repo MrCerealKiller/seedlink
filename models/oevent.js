@@ -2,7 +2,7 @@
  * @file Model for Output Events as stored on the database
  * @author Jeremy Mallette
  * @version 0.0.0
- * @module Models/SectorEvent
+ * @module Models/OutputSectorEvent
  */
 
 // Imports ---------------------------------------------------------------------
@@ -42,51 +42,51 @@ const oEventSchema = mongoose.Schema({
   }
 }, {timestamps: true});
 
-const OSectorEvent = module.exports = mongoose.model('OSectorEvent', oEventSchema);
+const OEvent = module.exports = mongoose.model('OutputEvent', oEventSchema);
 
 // Get SectorEvents ------------------------------------------------------------
-module.exports.getOSectorEventById = function(id, callback) {
-  SectorEvent.findById(id, callback);
+module.exports.getOEventById = function(id, callback) {
+  OEvent.findById(id, callback);
 };
 
-module.exports.getOSectorEventByTag = function(tag, callback) {
+module.exports.getOEventByTag = function(tag, callback) {
   var query = {tag: tag};
-  SectorEvent.findOne(query, callback);
+  OEvent.findOne(query, callback);
 };
 
-module.exports.getOSectorsEvents = function(sector, callback) {
+module.exports.getOEvents = function(sector, callback) {
   var query = {sector: sector};
-  SectorEvent.find(query, callback);
+  OEvent.find(query, callback);
 }
 
 // Add SectorEvent -------------------------------------------------------------
-module.exports.addOSectorEvent = function(sectorEvent, callback) {
-  sectorEvent.save(callback);
+module.exports.addOEvent = function(oEvent, callback) {
+  oEvent.save(callback);
 };
 
 // Update SectorEvent ----------------------------------------------------------
- module.exports.updateOSectorEvent = function(sectorEvent, callback) {
-  SectorEvent.findById(sectorEvent._id, function(err, dbSectorEvent) {
+ module.exports.updateOEvent = function(oEvent, callback) {
+  OEvent.findById(oEvent._id, function(err, dbOEvent) {
     if (err) {
       throw err;
     }
 
-    dbSectorEvent.tag = sectorEvent.tag;
-    dbSectorEvent.start = sectorEvent.start;
-    dbSectorEvent.duration = sectorEvent.duration;
-    dbSectorEvent.interval = sectorEvent.interval;
+    dbOEvent.tag = oEvent.tag;
+    dbOEvent.start = oEvent.start;
+    dbOEvent.duration = oEvent.duration;
+    dbOEvent.interval = oEvent.interval;
 
-    dbSectorEvent.save(callback);
+    dbOEvent.save(callback);
   });
 };
 
 // Remove SectorEvent ----------------------------------------------------------
-module.exports.removeOSectorEventById = function(id, callback) {
-  SectorEvent.findById(id, function(err, sectorEvent) {
+module.exports.removeOEventById = function(id, callback) {
+  OEvent.findById(id, function(err, oEvent) {
     if (err) {
       throw err;
     }
 
-    sectorEvent.remove(callback);
+    oEvent.remove(callback);
   });
 };
