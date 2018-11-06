@@ -15,6 +15,7 @@ const _PORT_PRODUCTION = 80;
 
 // Imports ---------------------------------------------------------------------
 const express       = require('express');
+const bluebird      = require('bluebird');
 const bodyParser    = require('body-parser');
 const cookieParser  = require('cookie-parser');
 const cors          = require('cors');
@@ -39,13 +40,14 @@ var app = express();
 
 // Initialize Mongoose ---------------------------------------------------------
 mongoose.connect(db.database, db.opts);
+mongoose.Promise = bluebird;
 
 mongoose.connection.on('connected', function() {
-    console.log('Sucessfully connected to database\n\n');
+    console.log('Sucessfully connected to database\n');
 });
 
 mongoose.connection.on('error', function(err) {
-    console.log('Error connecting to database: ' + err + '\n\n');
+    console.log('Error connecting to database: ' + err + '\n');
 });
 
 // ################

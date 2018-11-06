@@ -5,12 +5,12 @@
 * @module Models/OutputSector
 */
 
-// Imports ---------------------------------------------------------------------
+// Imports -----------------------------------------------------------------------------
 const mongoose  = require('mongoose');
-const inputSector = require('./isector');
-const outputSector = require('./osector');
+const InputSector = require('./isector');
+const OutputSector = require('./osector');
 
-// Create Models ---------------------------------------------------------------
+// Create Models -----------------------------------------------------------------------
 const systemSchema = mongoose.Schema({
   name: {
     type: String,
@@ -24,23 +24,23 @@ const systemSchema = mongoose.Schema({
     required: true,
     trim: true,
   },
-  inputPorts: [{
+  inputPort: {
     type: String,
     required: true,
-    trim: true,
-    sectors: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'InputSector'
-    }]
+    trim: true
+  },
+  inputSectors: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'InputSector'
   }],
-  outputPorts: [{
+  outputPort: {
     type: String,
     required: true,
-    trim: true,
-    sectors: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'OutputSector'
-    }]
+    trim: true
+  },
+  outputSectors: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'OutputSector'
   }],
   tempWarning: {
     type: Number
@@ -70,7 +70,7 @@ const systemSchema = mongoose.Schema({
 
 const System = module.exports = mongoose.model('System', systemSchema);
 
-// Get Sector ------------------------------------------------------------------
+// Get System --------------------------------------------------------------------------
 module.exports.getSystemById = function(id, callback) {
   System.findById(id, callback);
 };
@@ -84,69 +84,70 @@ module.exports.getAllSystems = function(callback) {
   System.find(callback);
 };
 
-// Add Event -------------------------------------------------------------------
+// Add System --------------------------------------------------------------------------
 module.exports.addSystem = function(system, callback) {
   system.save(callback);
 };
 
-// Update Event ----------------------------------------------------------------
+// Update System -----------------------------------------------------------------------
 module.exports.updateSystem = function(system, callback) {
   System.findById(system._id, function(err, dbSystem) {
     if (err) {
-      throw err;
+      callback(err, null);
+
+    } else if (dbSystem == null) {
+      callback(null, null);
+
+    } else {
+      dbSystem.name = system.name;
+      dbSystem.passcode = system.passcode;
+      dbSystem.inputPort = system.inputPort;
+      dbSystem.inputSectors = system.inputSectors;
+      dbSystem.outputPort = system.outputPort;
+      dbSystem.outputSectors = system.outputSectors
+      dbSystem.tempWarning = system.tempWarning;
+      dbSystem.tempCritical = system.tempCritical;
+      dbSystem.humidityWarning = system.humidityWarning;
+      dbSystem.humidityCritical = system.humidityCritical;
+      dbSystem.pHWarning = system.pHWarning;
+      dbSystem.pHCritical = system.pHCritical;
+      dbSystem.waterLevelWarning = system.waterLevelWarning;
+      dbSystem.waterLevelCritical = system.waterLevelCritical;
+
+      dbSystem.save(callback);
     }
-
-    dbSystem.name = system.name;
-    dbSystem.passcode = system.passcode;
-    dbSystem.inputPorts = system.inputPorts;
-    dbSystem.outputPorts = system.outputPorts;
-    dbSystem.tempWarning = system.tempWarning;
-    dbSystem.tempCritical = system.tempCritical;
-    dbSystem.humidityWarning = system.humidityWarning;
-    dbSystem.humidityCritical = system.humidityCritical;
-    dbSystem.pHWarning = system.pHWarning;
-    dbSystem.pHCritical = system.pHCritical;
-    dbSystem.waterLevelWarning = system.waterLevelWarning;
-    dbSystem.waterLevelCritical = system.waterLevelCritical;
-
-    dbSystem.save(callback);
   });
 };
 
-// Remove Event ----------------------------------------------------------------
+// Remove System -----------------------------------------------------------------------
 module.exports.removeSystemById = function(id, callback) {
   System.findById(id, function(err, system) {
     if (err) {
-      throw err;
-    }
+      callback(err, null);
 
-    if (system == null || system == undefined) {
-      callback(new Error('Invalid ID'), null);
-      return;
-    }
+    } else if (system == null) {
+      callback(null, null);
 
-    // Remove all of the children input sectors
-      system.inputPorts.forEach(function(port) {
-        port.sectors.forEach(function(sector) {
-          inputSector.removeISectorById(sector, function(err) {
-            if (err) {
-              throw err;
-            }
-          });
-        });
-      });
-
-    // Remove all of the children output sectors
-    system.outputPorts.forEach(function(port) {
-      port.sectors.forEach(function(sector) {
-        inputSector.removeISectorById(sector, function(err) {
+    } else {
+      // Remove all of the children input sectors
+      system.inputSectors.forEach(function(sector) {
+        InputSector.removeISectorById(sector, function(err) {
           if (err) {
             throw err;
           }
         });
       });
-    });
 
-    system.remove(callback);
+      // Remove all of the children output sectors
+      system.outputSectors.forEach(function(sector) {
+        OutputSector.removeOSectorById(sector, function(err) {
+          if (err) {
+            throw err;
+          }
+        });
+      });
+
+      system.remove(callback);
+    }
   });
 };
