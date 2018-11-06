@@ -9,6 +9,7 @@
 const mongoose = require('mongoose');
 const System   = require('./system');
 const OEvent   = require('./oevent');
+const IEvent   = require('./ievent');
 
 // Create Models ---------------------------------------------------------------
 const oSectorSchema = mongoose.Schema({
@@ -47,6 +48,10 @@ const oSectorSchema = mongoose.Schema({
   oEvents: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'OutputEvent'
+  }],
+  iEvents: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'InputEvent'
   }]
 }, {timestamps: true});
 
@@ -111,6 +116,7 @@ module.exports.updateOSector = function(sector, callback) {
       dbSector.type = sector.type;
       dbSector.key = sector.key;
       dbSector.oEvents = sector.oEvents;
+      dbSector.iEvents = sector.iEvents;
 
       dbSector.save(callback);
     }
@@ -164,7 +170,7 @@ module.exports.removeOSectorById = function(id, callback) {
       callback(null, null);
 
     } else {
-      // Remove all of the child events
+      // Remove all of the child output events
       sector.oEvents.forEach(function(oEvent) {
         OEvent.removeOEventById(oEvent, function(err) {
           if (err) {
@@ -173,7 +179,35 @@ module.exports.removeOSectorById = function(id, callback) {
         });
       });
 
-      sector.remove(callback);
+      // Remove all of the child input events
+      // and remove their reference from their input sector
+      var query = {_id: sector._id};
+      OSector.findOne(query).populate('iEvents').exec(function(err, sector) {
+        if (err) {
+          throw err;
+        }
+
+        sector.iEvents.forEach(function(iEvent) {
+          IEvent.findOne(iEvent).populate('sector').exec(function(err, iEvent) {
+            var idx = iEvent.sector.iEvents.indexOf(iEvent._id);
+            if (idx > -1) {
+              iEvent.sector.iEvents.splice(idx, 1);
+              iEvent.sector.save(function(err, iEvent) {
+                if (err) {
+                  throw err;
+                }
+              });
+            }
+          });
+
+          IEvent.removeIEventById(iEvent._id, function(err) {
+            if (err) {
+              throw err;
+            }
+          });
+        });
+        sector.remove(callback);
+      });
     }
   });
 };

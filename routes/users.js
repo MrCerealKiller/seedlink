@@ -615,4 +615,147 @@ function deleteOutputEvent(req, res) {
   });
 }
 
+// Input Events ----------------------------------------------------------------
+router.route('/system/input/event')
+  .get(function(req, res, next) {
+    getInputEvent(req,res);
+  })
+  .post(function(req, res, next) {
+    addInputEvent(req, res);
+  })
+  .put(function(req, res, next) {
+    updateInputEvent(req, res);
+  })
+  .delete(function(req, res, next) {
+    deleteInputEvent(req, res);
+  });
+
+function getInputEvent(req, res) {
+  var id = req.headers.id;
+
+  if (id != null && id != undefined && id != "") {
+    IEvent.getIEventById(id, function(err, iEvent) {
+      if (err) {
+        res.json({
+          success: false,
+          msg: ('Could not retrieve the event. Error: ' + err),
+          iEvent: undefined
+        });
+      } else if (iEvent == null) {
+        res.json({
+          success: false,
+          msg: ('Could not retrieve the event. Error: ID not found'),
+          iEvent: undefined
+        });
+      } else {
+        res.json({
+          success: true,
+          msg: 'Retrieved the requested event',
+          iEvent: iEvent
+        });
+      }
+    });
+  } else {
+    res.json({
+      success: false,
+      msg: ('This request requires a valid ID'),
+      iEvent: undefined
+    });
+  }
+}
+
+function addInputEvent(req, res) {
+  var newEvent = new IEvent({
+    sector: req.body.sector,
+    target: req.body.target,
+    tag: req.body.tag,
+    threshold: req.body.threshold,
+    duration: req.body.duration
+  });
+
+  IEvent.addIEvent(newEvent, function(err, iEvent) {
+    if (err) {
+      res.json({
+        success: false,
+        msg: 'Could not add the event. Error: ' + err
+      });
+    } else if (iEvent == null) {
+      res.json({
+        success: false,
+        msg: 'Could not add the event. Error: ID not found'
+      });
+    } else {
+      res.json({
+        success: true,
+        msg: iEvent.tag + ' was saved'
+      });
+    }
+  });
+}
+
+function updateInputEvent(req, res) {
+  var update = new IEvent({
+    _id: req.body._id,
+    tag: req.body.tag,
+    threshold: req.body.threshold,
+    duration: req.body.duration
+  });
+
+  IEvent.updateIEvent(update, function(err, iEvent) {
+    if (err) {
+      res.json({
+        success: false,
+        msg: 'Could not update the event. Error: ' + err
+      });
+    } else if (iEvent == null) {
+      res.json({
+        success: false,
+        msg: 'Could not update the event. Error: ID not found'
+      });
+    } else {
+      res.json({
+        success: true,
+        msg: iEvent.tag + ' was saved'
+      });
+    }
+  });
+}
+
+function deleteInputEvent(req, res) {
+  var id = req.headers.id;
+
+  IEvent.detachIEventById(id, function(err, iEvent) {
+    if (err) {
+      res.json({
+        success: false,
+        msg: 'Could not detach the event. Error: ' + err
+      });
+    } else if (iEvent == null) {
+      res.json({
+        success: false,
+        msg: 'Could not detach the event. Error: ID not found'
+      });
+    } else {
+      IEvent.removeIEventById(id, function(err, iEvent) {
+        if (err) {
+          res.json({
+            success: false,
+            msg: 'Could not delete the event. Error: ' + err
+          });
+        } else if (iEvent == null) {
+          res.json({
+            success: false,
+            msg: 'Could not delete the event. Error: internal error'
+          });
+        } else {
+          res.json({
+            success: true,
+            msg: iEvent.tag + ' was deleted'
+          });
+        }
+      });
+    }
+  });
+}
+
 module.exports = router;

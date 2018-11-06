@@ -168,16 +168,35 @@ module.exports.removeISectorById = function(id, callback) {
       callback(null, null);
 
     } else {
-      // Remove all of the child events
-      sector.iEvents.forEach(function(iEvent) {
-        IEvent.removeIEventById(iEvent, function(err) {
-          if (err) {
-            throw err;
-          }
-        });
-      });
+      // Remove all of the child input events
+      // and remove their reference from their input sector
+      var query = {_id: sector._id};
+      ISector.findOne(query).populate('iEvents').exec(function(err, sector) {
+        if (err) {
+          throw err;
+        }
 
-      sector.remove(callback);
+        sector.iEvents.forEach(function(iEvent) {
+          IEvent.findOne(iEvent).populate('target').exec(function(err, iEvent) {
+            var idx = iEvent.target.iEvents.indexOf(iEvent._id);
+            if (idx > -1) {
+              iEvent.target.iEvents.splice(idx, 1);
+              iEvent.target.save(function(err, iEvent) {
+                if (err) {
+                  throw err;
+                }
+              });
+            }
+          });
+
+          IEvent.removeIEventById(iEvent._id, function(err) {
+            if (err) {
+              throw err;
+            }
+          });
+        });
+        sector.remove(callback);
+      });
     }
   });
 };

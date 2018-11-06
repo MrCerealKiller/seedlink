@@ -122,7 +122,7 @@ module.exports.detachOEventById = function(id, callback) {
       callback(null, null);
 
     } else {
-      // Remove the sector from the system input sector array
+      // Remove the event from the sector
       OEvent.findOne(oEvent).populate('sector').exec(function(err, oEvent) {
         if (err) {
           callback(err, null);

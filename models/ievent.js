@@ -15,6 +15,11 @@ const iEventSchema = mongoose.Schema({
     ref: 'InputSector',
     required: true
   },
+  target: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'OutputSector',
+    required: true
+  },
   tag: {
     type: String,
     required: true,
@@ -53,7 +58,45 @@ module.exports.getSectorIEvents = function(sector, callback) {
 
 // Add Event -------------------------------------------------------------------
 module.exports.addIEvent = function(iEvent, callback) {
-  iEvent.save(callback);
+  iEvent.save(function(err, iEvent) {
+    if (err) {
+      callback(err, null);
+
+    } else if (iEvent == null) {
+      callback(null, null);
+
+    } else {
+      // Add the id to the system input and output sectors
+      IEvent.findOne(iEvent)
+            .populate('sector')
+            .populate('target')
+            .exec(function(err, iEvent) {
+        if (err) {
+          callback(err, null);
+
+        } else if (iEvent == null) {
+          callback(null, null);
+
+        } else {
+          iEvent.sector.iEvents.push(iEvent._id);
+          iEvent.sector.save(function(err, sector) {
+            if (err) {
+              callback(err, null);
+            } else {
+              iEvent.target.iEvents.push(iEvent._id);
+              iEvent.target.save(function(err, sector) {
+                if (err) {
+                  callback(err, null);
+                } else {
+                  callback(null, iEvent)
+                }
+              });
+            }
+          });
+        }
+      });
+    }
+  });
 };
 
 // Update Event ----------------------------------------------------------------
@@ -67,9 +110,8 @@ module.exports.addIEvent = function(iEvent, callback) {
 
     } else {
       dbIEvent.tag = iEvent.tag;
-      dbIEvent.start = iEvent.start;
+      dbIEvent.threshold = iEvent.threshold;
       dbIEvent.duration = iEvent.duration;
-      dbIEvent.interval = iEvent.interval;
 
       dbIEvent.save(callback);
     }
@@ -77,6 +119,58 @@ module.exports.addIEvent = function(iEvent, callback) {
 };
 
 // Remove Event ----------------------------------------------------------------
+module.exports.detachIEventById = function(id, callback) {
+  IEvent.getIEventById(id, function(err, iEvent) {
+    if (err) {
+      callback(err, null);
+
+    } else if (iEvent == null) {
+      callback(null, null);
+
+    } else {
+      // Remove the event from the both the sectors
+      IEvent.findOne(iEvent)
+            .populate('sector')
+            .populate('target')
+            .exec(function(err, iEvent) {
+        if (err) {
+          callback(err, null);
+
+        } else if (iEvent == null) {
+          callback(null, null);
+
+        } else {
+          var sidx = iEvent.sector.iEvents.indexOf(iEvent._id);
+          if (sidx > -1) {
+            iEvent.sector.iEvents.splice(sidx, 1);
+            iEvent.sector.save(function(err, sector) {
+              if (err) {
+                callback(err, null);
+              } else {
+                var tidx = iEvent.target.iEvents.indexOf(iEvent._id);
+                if (tidx > -1) {
+                  iEvent.target.iEvents.splice(tidx, 1);
+                  iEvent.target.save(function(err, sector) {
+                    if (err) {
+                      callback(err, null);
+                    } else {
+                      callback(null, iEvent);
+                    }
+                  });
+                } else {
+                  callback(new Error('event is not listed in target', null));
+                }
+              }
+            });
+          } else {
+            callback(new Error('event is not listed in sector', null));
+          }
+        }
+      });
+    }
+  });
+};
+
 module.exports.removeIEventById = function(id, callback) {
   IEvent.findById(id, function(err, iEvent) {
     if (err) {
@@ -86,7 +180,7 @@ module.exports.removeIEventById = function(id, callback) {
       callback(null, null);
 
     } else {
-      iEvent.remove(callback);      
+      iEvent.remove(callback);
     }
   });
 };
