@@ -294,7 +294,7 @@ function deleteInputSector(req, res) {
   var id = req.headers.id;
 
   ISector.detachISectorById(id, function(err, sector) {
-    if (err || sector) {
+    if (err) {
       res.json({
         success: false,
         msg: 'Could not detach the sector. Error: ' + err
@@ -551,6 +551,7 @@ function addOutputEvent(req, res) {
 
 function updateOutputEvent(req, res) {
   var update = new OEvent({
+    _id: req.body._id,
     tag: req.body.tag,
     start: req.body.start,
     duration: req.body.duration,
@@ -577,10 +578,10 @@ function updateOutputEvent(req, res) {
   });
 }
 
-function deleteOutputSector(req, res) {
+function deleteOutputEvent(req, res) {
   var id = req.headers.id;
 
-  OSector.detachOSectorById(id, function(err, oEvent) {
+  OEvent.detachOEventById(id, function(err, oEvent) {
     if (err) {
       res.json({
         success: false,
@@ -592,16 +593,16 @@ function deleteOutputSector(req, res) {
         msg: 'Could not detach the event. Error: ID not found'
       });
     } else {
-      OSector.removeOSectorById(id, function(err, oEvent) {
+      OEvent.removeOEventById(id, function(err, oEvent) {
         if (err) {
           res.json({
             success: false,
-            msg: 'Could not delete the sector. Error: ' + err
+            msg: 'Could not delete the event. Error: ' + err
           });
         } else if (oEvent == null) {
           res.json({
             success: false,
-            msg: 'Could not delete the sector. Error: internal error'
+            msg: 'Could not delete the event. Error: internal error'
           });
         } else {
           res.json({

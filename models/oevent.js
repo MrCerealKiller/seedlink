@@ -83,7 +83,7 @@ module.exports.addOEvent = function(oEvent, callback) {
             if (err) {
               callback(err, null);
             } else {
-              callback(null, sector);
+              callback(null, oEvent);
             }
           });
         }
@@ -113,6 +113,43 @@ module.exports.addOEvent = function(oEvent, callback) {
 };
 
 // Remove Event ----------------------------------------------------------------
+module.exports.detachOEventById = function(id, callback) {
+  OEvent.getOEventById(id, function(err, oEvent) {
+    if (err) {
+      callback(err, null);
+
+    } else if (oEvent == null) {
+      callback(null, null);
+
+    } else {
+      // Remove the sector from the system input sector array
+      OEvent.findOne(oEvent).populate('sector').exec(function(err, oEvent) {
+        if (err) {
+          callback(err, null);
+
+        } else if (oEvent == null) {
+          callback(null, null);
+
+        } else {
+          var idx = oEvent.sector.oEvents.indexOf(oEvent._id);
+          if (idx > -1) {
+            oEvent.sector.oEvents.splice(idx, 1);
+            oEvent.sector.save(function(err, sector) {
+              if (err) {
+                callback(err, null);
+              } else {
+                callback(null, oEvent);
+              }
+            });
+          } else {
+            callback(new Error('event is not listed in the sector', null));
+          }
+        }
+      });
+    }
+  });
+};
+
 module.exports.removeOEventById = function(id, callback) {
   OEvent.findById(id, function(err, oEvent) {
     if (err) {

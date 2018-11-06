@@ -147,7 +147,7 @@ module.exports.detachOSectorById = function(id, callback) {
               }
             });
           } else {
-            callback(new Error('sector is not listed in the system', null);
+            callback(new Error('sector is not listed in the system', null));
           }
         }
       });
