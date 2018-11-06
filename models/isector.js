@@ -67,44 +67,44 @@ module.exports.getSectorsByType = function(type, callback) {
   ISector.find(query, callback);
 }
 
-// Add Event -------------------------------------------------------------------
+// Add Sector ------------------------------------------------------------------
 module.exports.addISector = function(sector, callback) {
   sector.save(function(err, sector) {
-    if (err || sector == null) {
-      callback(err, null);
-      return;
+    if (err) {
+      throw err;
     }
 
-    var callbackErr = false;
+    if (sector == null) {
+      throw new Error('sector could not be found');
+    }
 
     // Add the id to the system input sectors
     ISector.findOne(sector).populate('system').exec(function(err, sector) {
-      if (err || sector == null || sector == undefined) {
-        callbackErr = true;
+      if (err || sector == null) {
+        throw new Error('system could not be found');
       }
 
       sector.system.inputSectors.push(sector._id);
       sector.system.save(function(err, system) {
         if (err) {
-          callbackErr = true;
+          throw err;
         }
       });
     });
 
-    if (callbackErr) {
-      callback(new Error('could not link sector to system'), null);
-    } else {
-      callback(null, sector);
-    }
+    callback(null, sector);
   });
 };
 
-// Update Event ----------------------------------------------------------------
+// Update Sector ---------------------------------------------------------------
 module.exports.updateISector = function(sector, callback) {
   ISector.findById(sector._id, function(err, dbSector) {
-    if (err || dbSector == null) {
-      callback(err, null);
-      return;
+    if (err) {
+      throw err;
+    }
+
+    if (dbSector == null) {
+      throw new Error('sector could not be found');
     }
 
     dbSector.name = sector.name;
@@ -116,21 +116,20 @@ module.exports.updateISector = function(sector, callback) {
   });
 };
 
-// Remove Event ----------------------------------------------------------------
+// Remove Sector ---------------------------------------------------------------
 module.exports.detachISectorById = function(id, callback) {
   ISector.getISectorById(id, function(err, sector) {
-    if (err || sector == null) {
-      callback(err, null);
-      return;
+    if (err) {
+      throw err;
     }
 
-    var callbackErr = false;
-
+    if (sector == null) {
+      throw new Error('sector could not be found');
+    }
     // Remove the sector from the system input sector array
     ISector.findOne(sector).populate('system').exec(function(err, sector) {
       if (err || sector == null) {
-        callbackErr = true;
-        return;
+        throw new Error('system could not be found');
       }
 
       var idx = sector.system.inputSectors.indexOf(sector._id);
@@ -138,19 +137,15 @@ module.exports.detachISectorById = function(id, callback) {
         sector.system.inputSectors.splice(idx, 1);
         sector.system.save(function(err, system) {
           if (err) {
-            callbackErr = true;
+            throw err;
           }
         });
       } else {
-        callbackErr = true;
+        throw new Error('sector is not listed in the system');
       }
     });
 
-    if (callbackErr) {
-      callback(new Error('could not delete sector from system'), null);
-    } else {
-      callback(null, sector);
-    }
+    callback(null, sector);
   });
 };
 

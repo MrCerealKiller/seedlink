@@ -5,12 +5,12 @@
 * @module Models/OutputSector
 */
 
-// Imports ---------------------------------------------------------------------
+// Imports -----------------------------------------------------------------------------
 const mongoose  = require('mongoose');
 const InputSector = require('./isector');
 const OutputSector = require('./osector');
 
-// Create Models ---------------------------------------------------------------
+// Create Models -----------------------------------------------------------------------
 const systemSchema = mongoose.Schema({
   name: {
     type: String,
@@ -70,7 +70,7 @@ const systemSchema = mongoose.Schema({
 
 const System = module.exports = mongoose.model('System', systemSchema);
 
-// Get Sector ------------------------------------------------------------------
+// Get System --------------------------------------------------------------------------
 module.exports.getSystemById = function(id, callback) {
   System.findById(id, callback);
 };
@@ -84,12 +84,12 @@ module.exports.getAllSystems = function(callback) {
   System.find(callback);
 };
 
-// Add Event -------------------------------------------------------------------
+// Add System --------------------------------------------------------------------------
 module.exports.addSystem = function(system, callback) {
   system.save(callback);
 };
 
-// Update Event ----------------------------------------------------------------
+// Update System -----------------------------------------------------------------------
 module.exports.updateSystem = function(system, callback) {
   System.findById(system._id, function(err, dbSystem) {
     if (err) {
@@ -115,16 +115,15 @@ module.exports.updateSystem = function(system, callback) {
   });
 };
 
-// Remove Event ----------------------------------------------------------------
+// Remove System -----------------------------------------------------------------------
 module.exports.removeSystemById = function(id, callback) {
   System.findById(id, function(err, system) {
     if (err) {
       throw err;
     }
 
-    if (system == null || system == undefined) {
-      callback(new Error('Invalid ID'), null);
-      return;
+    if (system == null) {
+      throw new Error('Invalid ID');
     }
 
     // Remove all of the children input sectors

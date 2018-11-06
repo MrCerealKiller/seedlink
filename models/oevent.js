@@ -44,7 +44,7 @@ const oEventSchema = mongoose.Schema({
 
 const OEvent = module.exports = mongoose.model('OutputEvent', oEventSchema);
 
-// Get SectorEvents ------------------------------------------------------------
+// Get Events ------------------------------------------------------------------
 module.exports.getOEventById = function(id, callback) {
   OEvent.findById(id, callback);
 };
@@ -54,21 +54,48 @@ module.exports.getOEventByTag = function(tag, callback) {
   OEvent.findOne(query, callback);
 };
 
-module.exports.getOEvents = function(sector, callback) {
+module.exports.getSectorOEvents = function(sector, callback) {
   var query = {sector: sector};
   OEvent.find(query, callback);
-}
-
-// Add SectorEvent -------------------------------------------------------------
-module.exports.addOEvent = function(oEvent, callback) {
-  oEvent.save(callback);
 };
 
-// Update SectorEvent ----------------------------------------------------------
+// Add Event -------------------------------------------------------------------
+module.exports.addOEvent = function(oEvent, callback) {
+  oEvent.save(function(err, oEvent) {
+    if (err) {
+      throw err;
+    }
+
+    if (oEvent == null) {
+      throw new Error('event could not be found');
+    }
+    // Add the id to the output sectors events
+    OEvent.findOne(oEvent).populate('sector').exec(function(err, oEvent) {
+      if (err) {
+        throw err;
+      }
+
+      oEvent.sector.oEvents.push(oEvent._id);
+      oEvent.sector.save(function(err, sector) {
+        if (err) {
+          throw err;
+        }
+      });
+    });
+
+    callback(null, sector);
+  });
+};
+
+// Update Event ----------------------------------------------------------------
  module.exports.updateOEvent = function(oEvent, callback) {
   OEvent.findById(oEvent._id, function(err, dbOEvent) {
     if (err) {
       throw err;
+    }
+
+    if (dbOEvent == null) {
+      throw new Error('event could not be found');
     }
 
     dbOEvent.tag = oEvent.tag;
@@ -80,7 +107,7 @@ module.exports.addOEvent = function(oEvent, callback) {
   });
 };
 
-// Remove SectorEvent ----------------------------------------------------------
+// Remove Event ----------------------------------------------------------------
 module.exports.removeOEventById = function(id, callback) {
   OEvent.findById(id, function(err, oEvent) {
     if (err) {

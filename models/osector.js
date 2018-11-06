@@ -67,42 +67,43 @@ module.exports.getSectorsByType = function(type, callback) {
   OSector.find(query, callback);
 }
 
-// Add Event -------------------------------------------------------------------
+// Add Sector ------------------------------------------------------------------
 module.exports.addOSector = function(sector, callback) {
   sector.save(function(err, sector) {
     if (err) {
       throw err;
     }
 
-    var callbackErr = false;
-
-    // Add the id to the system input sectors
+    if (sector == null) {
+      throw new Error('sector could not be found');
+    }
+    // Add the id to the system output sectors
     OSector.findOne(sector).populate('system').exec(function(err, sector) {
-      if (err || sector == null || sector == undefined) {
-        callbackErr = true;
+      if (err || sector == null) {
+        throw new Error('system could not be found');
       }
 
       sector.system.outputSectors.push(sector._id);
       sector.system.save(function(err, system) {
         if (err) {
-          callbackErr = true;
+          throw err;
         }
       });
     });
 
-    if (callbackErr) {
-      callback(new Error('could not link sector to system'), null);
-    } else {
-      callback(null, sector);
-    }
+    callback(null, sector);
   });
 };
 
-// Update Event ----------------------------------------------------------------
+// Update Sector ---------------------------------------------------------------
 module.exports.updateOSector = function(sector, callback) {
   OSector.findById(sector._id, function(err, dbSector) {
     if (err) {
       throw err;
+    }
+
+    if (dbSector == null) {
+      throw new Error('sector could not be found');
     }
 
     dbSector.name = sector.name;
@@ -114,14 +115,16 @@ module.exports.updateOSector = function(sector, callback) {
   });
 };
 
-// Remove Event ----------------------------------------------------------------
+// Remove Sector ---------------------------------------------------------------
 module.exports.detachOSectorById = function(id, callback) {
   OSector.getOSectorById(id, function(err, sector) {
     if (err) {
       throw err;
     }
 
-    var callbackErr = false;
+    if (sector == null) {
+      throw new Error('sector could not be found');
+    }
 
     // Remove the sector from the system input sector array
     OSector.findOne(sector).populate('system').exec(function(err, sector) {
@@ -134,19 +137,15 @@ module.exports.detachOSectorById = function(id, callback) {
         sector.system.outputSectors.splice(idx, 1);
         sector.system.save(function(err, system) {
           if (err) {
-            callbackErr = true;
+            throw err;
           }
         });
       } else {
-        callbackErr = true;
+        throw new Error('sector is not in the system');
       }
     });
 
-    if (callbackErr) {
-      callback(new Error('could not delete sector from system'), null);
-    } else {
-      callback(null, sector);
-    }
+    callback(null, sector);
   });
 };
 
@@ -155,6 +154,15 @@ module.exports.removeOSectorById = function(id, callback) {
     if (err) {
       throw err;
     }
+
+    // Remove all of the child events
+    sector.oEvents.forEach(function(oEvent) {
+      OEvent.removeOEventById(oEvent, function(err) {
+        if (err) {
+          throw err;
+        }
+      });
+    });
 
     sector.remove(callback);
   });

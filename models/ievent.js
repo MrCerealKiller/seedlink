@@ -36,7 +36,7 @@ const iEventSchema = mongoose.Schema({
 
 const IEvent = module.exports = mongoose.model('InputEvent', iEventSchema);
 
-// Get SectorEvents ------------------------------------------------------------
+// Get Events ------------------------------------------------------------------
 module.exports.getIEventById = function(id, callback) {
   IEvent.findById(id, callback);
 };
@@ -46,21 +46,25 @@ module.exports.getIEventByTag = function(tag, callback) {
   IEvent.findOne(query, callback);
 };
 
-module.exports.getIEvents = function(sector, callback) {
+module.exports.getSectorIEvents = function(sector, callback) {
   var query = {sector: sector};
   IEvent.find(query, callback);
-}
+};
 
-// Add SectorEvent -------------------------------------------------------------
+// Add Event -------------------------------------------------------------------
 module.exports.addIEvent = function(iEvent, callback) {
   iEvent.save(callback);
 };
 
-// Update SectorEvent ----------------------------------------------------------
+// Update Event ----------------------------------------------------------------
  module.exports.updateIEvent = function(iEvent, callback) {
   IEvent.findById(iEvent._id, function(err, dbIEvent) {
     if (err) {
       throw err;
+    }
+
+    if (dbIEvent == null) {
+      throw new Error('sector could not be found');
     }
 
     dbIEvent.tag = iEvent.tag;
@@ -72,7 +76,7 @@ module.exports.addIEvent = function(iEvent, callback) {
   });
 };
 
-// Remove SectorEvent ----------------------------------------------------------
+// Remove Event ----------------------------------------------------------------
 module.exports.removeIEventById = function(id, callback) {
   IEvent.findById(id, function(err, iEvent) {
     if (err) {
