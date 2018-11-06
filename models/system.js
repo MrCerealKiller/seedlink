@@ -93,25 +93,29 @@ module.exports.addSystem = function(system, callback) {
 module.exports.updateSystem = function(system, callback) {
   System.findById(system._id, function(err, dbSystem) {
     if (err) {
-      throw err;
+      callback(err, null);
+
+    } else if (dbSystem == null) {
+      callback(null, null);
+
+    } else {
+      dbSystem.name = system.name;
+      dbSystem.passcode = system.passcode;
+      dbSystem.inputPort = system.inputPort;
+      dbSystem.inputSectors = system.inputSectors;
+      dbSystem.outputPort = system.outputPort;
+      dbSystem.outputSectors = system.outputSectors
+      dbSystem.tempWarning = system.tempWarning;
+      dbSystem.tempCritical = system.tempCritical;
+      dbSystem.humidityWarning = system.humidityWarning;
+      dbSystem.humidityCritical = system.humidityCritical;
+      dbSystem.pHWarning = system.pHWarning;
+      dbSystem.pHCritical = system.pHCritical;
+      dbSystem.waterLevelWarning = system.waterLevelWarning;
+      dbSystem.waterLevelCritical = system.waterLevelCritical;
+
+      dbSystem.save(callback);
     }
-
-    dbSystem.name = system.name;
-    dbSystem.passcode = system.passcode;
-    dbSystem.inputPort = system.inputPort;
-    dbSystem.inputSectors = system.inputSectors;
-    dbSystem.outputPort = system.outputPort;
-    dbSystem.outputSectors = system.outputSectors
-    dbSystem.tempWarning = system.tempWarning;
-    dbSystem.tempCritical = system.tempCritical;
-    dbSystem.humidityWarning = system.humidityWarning;
-    dbSystem.humidityCritical = system.humidityCritical;
-    dbSystem.pHWarning = system.pHWarning;
-    dbSystem.pHCritical = system.pHCritical;
-    dbSystem.waterLevelWarning = system.waterLevelWarning;
-    dbSystem.waterLevelCritical = system.waterLevelCritical;
-
-    dbSystem.save(callback);
   });
 };
 
@@ -119,31 +123,31 @@ module.exports.updateSystem = function(system, callback) {
 module.exports.removeSystemById = function(id, callback) {
   System.findById(id, function(err, system) {
     if (err) {
-      throw err;
-    }
+      callback(err, null);
 
-    if (system == null) {
-      throw new Error('Invalid ID');
-    }
+    } else if (system == null) {
+      callback(null, null);
 
-    // Remove all of the children input sectors
-    system.inputSectors.forEach(function(sector) {
-      InputSector.removeISectorById(sector, function(err) {
-        if (err) {
-          throw err;
-        }
+    } else {
+      // Remove all of the children input sectors
+      system.inputSectors.forEach(function(sector) {
+        InputSector.removeISectorById(sector, function(err) {
+          if (err) {
+            throw err;
+          }
+        });
       });
-    });
 
-    // Remove all of the children output sectors
-    system.outputSectors.forEach(function(sector) {
-      OutputSector.removeOSectorById(sector, function(err) {
-        if (err) {
-          throw err;
-        }
+      // Remove all of the children output sectors
+      system.outputSectors.forEach(function(sector) {
+        OutputSector.removeOSectorById(sector, function(err) {
+          if (err) {
+            throw err;
+          }
+        });
       });
-    });
 
-    system.remove(callback);
+      system.remove(callback);
+    }
   });
 };

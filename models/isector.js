@@ -71,28 +71,33 @@ module.exports.getSectorsByType = function(type, callback) {
 module.exports.addISector = function(sector, callback) {
   sector.save(function(err, sector) {
     if (err) {
-      throw err;
-    }
+      callback(err, null);
 
-    if (sector == null) {
-      throw new Error('sector could not be found');
-    }
+    } else if (sector == null) {
+      callback(null, null);
 
-    // Add the id to the system input sectors
-    ISector.findOne(sector).populate('system').exec(function(err, sector) {
-      if (err || sector == null) {
-        throw new Error('system could not be found');
-      }
-
-      sector.system.inputSectors.push(sector._id);
-      sector.system.save(function(err, system) {
+    } else {
+      // Add the id to the system input sectors
+      ISector.findOne(sector).populate('system').exec(function(err, sector) {
         if (err) {
-          throw err;
+          callback(err, null);
+
+        } else if (sector == null) {
+          callback(null, null);
+
+        } else {
+          sector.system.inputSectors.push(sector._id);
+          sector.system.save(function(err, system) {
+            if (err) {
+              callback(err, null);
+
+            } else {
+              callback(null, sector);
+            }
+          });
         }
       });
-    });
-
-    callback(null, sector);
+    }
   });
 };
 
@@ -100,19 +105,19 @@ module.exports.addISector = function(sector, callback) {
 module.exports.updateISector = function(sector, callback) {
   ISector.findById(sector._id, function(err, dbSector) {
     if (err) {
-      throw err;
+      callback(err, null);
+
+    } else if (dbSector == null) {
+      callback(null, null);
+
+    } else {
+      dbSector.name = sector.name;
+      dbSector.type = sector.type;
+      dbSector.key = sector.key;
+      dbSector.iEvents = sector.iEvents;
+
+      dbSector.save(callback);
     }
-
-    if (dbSector == null) {
-      throw new Error('sector could not be found');
-    }
-
-    dbSector.name = sector.name;
-    dbSector.type = sector.type;
-    dbSector.key = sector.key;
-    dbSector.iEvents = sector.iEvents;
-
-    dbSector.save(callback);
   });
 };
 
@@ -120,50 +125,59 @@ module.exports.updateISector = function(sector, callback) {
 module.exports.detachISectorById = function(id, callback) {
   ISector.getISectorById(id, function(err, sector) {
     if (err) {
-      throw err;
-    }
+      callback(err, null);
 
-    if (sector == null) {
-      throw new Error('sector could not be found');
-    }
-    // Remove the sector from the system input sector array
-    ISector.findOne(sector).populate('system').exec(function(err, sector) {
-      if (err || sector == null) {
-        throw new Error('system could not be found');
-      }
+    } else if (sector == null) {
+      callback(null, null);
 
-      var idx = sector.system.inputSectors.indexOf(sector._id);
-      if (idx > -1) {
-        sector.system.inputSectors.splice(idx, 1);
-        sector.system.save(function(err, system) {
-          if (err) {
-            throw err;
+    } else {
+      // Remove the sector from the system input sector array
+      ISector.findOne(sector).populate('system').exec(function(err, sector) {
+        if (err) {
+          callback(err, null);
+
+        } else if (sector == null) {
+          callback(null, null);
+
+        } else {
+          var idx = sector.system.inputSectors.indexOf(sector._id);
+          if (idx > -1) {
+            sector.system.inputSectors.splice(idx, 1);
+            sector.system.save(function(err, system) {
+              if (err) {
+                callback(err, null);
+              } else {
+                callback(null, sector);
+              }
+            });
+          } else {
+            callback(new Error('sector is not listed in the system', null);
           }
-        });
-      } else {
-        throw new Error('sector is not listed in the system');
-      }
-    });
-
-    callback(null, sector);
+        }
+      });
+    }
   });
 };
 
 module.exports.removeISectorById = function(id, callback) {
   ISector.findById(id, function(err, sector) {
     if (err) {
-      throw err;
-    }
+      callback(err, null);
 
-    // Remove all of the child events
-    sector.iEvents.forEach(function(iEvent) {
-      IEvent.removeIEventById(iEvent, function(err) {
-        if (err) {
-          throw err;
-        }
+    } else if (sector == null) {
+      callback(null, null);
+
+    } else {
+      // Remove all of the child events
+      sector.iEvents.forEach(function(iEvent) {
+        IEvent.removeIEventById(iEvent, function(err) {
+          if (err) {
+            throw err;
+          }
+        });
       });
-    });
 
-    sector.remove(callback);
+      sector.remove(callback);
+    }
   });
 };

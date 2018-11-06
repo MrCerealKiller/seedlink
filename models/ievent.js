@@ -60,19 +60,19 @@ module.exports.addIEvent = function(iEvent, callback) {
  module.exports.updateIEvent = function(iEvent, callback) {
   IEvent.findById(iEvent._id, function(err, dbIEvent) {
     if (err) {
-      throw err;
+      callback(err, null);
+
+    } else if (dbIEvent == null) {
+      callback(null, null);
+
+    } else {
+      dbIEvent.tag = iEvent.tag;
+      dbIEvent.start = iEvent.start;
+      dbIEvent.duration = iEvent.duration;
+      dbIEvent.interval = iEvent.interval;
+
+      dbIEvent.save(callback);
     }
-
-    if (dbIEvent == null) {
-      throw new Error('sector could not be found');
-    }
-
-    dbIEvent.tag = iEvent.tag;
-    dbIEvent.start = iEvent.start;
-    dbIEvent.duration = iEvent.duration;
-    dbIEvent.interval = iEvent.interval;
-
-    dbIEvent.save(callback);
   });
 };
 
@@ -80,9 +80,13 @@ module.exports.addIEvent = function(iEvent, callback) {
 module.exports.removeIEventById = function(id, callback) {
   IEvent.findById(id, function(err, iEvent) {
     if (err) {
-      throw err;
-    }
+      callback(err, null);
 
-    iEvent.remove(callback);
+    } else if (iEvent == null) {
+      callback(null, null);
+
+    } else {
+      iEvent.remove(callback);      
+    }
   });
 };

@@ -14,7 +14,7 @@ const router = express.Router();
 const db_config = require('../config/database.js');
 const System    = require('../models/system');
 const ISector   = require('../models/isector');
-const iEvent    = require('../models/ievent');
+const IEvent    = require('../models/ievent');
 const OSector   = require('../models/osector');
 const OEvent    = require('../models/oevent');
 
@@ -36,42 +36,49 @@ router.route('/system')
 function getSystem(req, res) {
   var id = req.headers.id;
 
-  try {
-    if (id != null && id != undefined && id != "") {
-      System.getSystemById(id, function(err, system) {
-        if (err) {
-          throw err;
-        } else if (system == null) {
-          throw new Error('id not found');
-        } else {
-          res.json({
-            success: true,
-            msg: 'Retrieved the requested system',
-            system: system
-          });
-        }
-      });
-    } else {
-      System.getAllSystems(function(err, systems) {
-        if (err) {
-          throw err;
-        } else if (systems == null) {
-          throw new Error('unable to find systems (null)');
-        } else {
-          res.json({
-            success: true,
-            msg: 'Retrieved Seedlink systems',
-            systems: systems
-          });
-        }
-      });
-    }
-  } catch (err) {
-    res.json({
-      success: false,
-      msg: ('Could not retrieve the system. Error: ' + err),
-      system: undefined,
-      systems: undefined
+  if (id != null && id != undefined && id != "") {
+    System.getSystemById(id, function(err, system) {
+      if (err) {
+        res.json({
+          success: false,
+          msg: ('Could not retrieve the system. Error: ' + err),
+          system: undefined
+        });
+      } else if (system == null) {
+        res.json({
+          success: false,
+          msg: ('Could not retrieve the system. Error: ID not found'),
+          system: undefined
+        });
+      } else {
+        res.json({
+          success: true,
+          msg: 'Retrieved the system',
+          system: system
+        });
+      }
+    });
+  } else {
+    System.getAllSystems(function(err, systems) {
+      if (err) {
+        res.json({
+          success: false,
+          msg: ('Could not retrieve the systems. Error: ' + err),
+          systems: undefined
+        });
+      } else if (systems == null) {
+        res.json({
+          success: false,
+          msg: ('Could not retrieve the systems. Error: none found'),
+          systems: undefined
+        });
+      } else {
+        res.json({
+          success: true,
+          msg: 'Retrieved all systems',
+          systems: systems
+        });
+      }
     });
   }
 }
@@ -94,25 +101,24 @@ function addSystem(req, res) {
     waterLevelCritical: req.body.waterLevelCritical
   });
 
-  try {
-    System.addSystem(newSystem, function(err, system) {
-      if (err) {
-        throw err;
-      } else if (system == null) {
-        throw new Error('id not found');
-      } else {
-        res.json({
-          success: true,
-          msg: system.name + ' was saved.'
-        });
-      }
-    });
-  } catch (err) {
-    res.json({
-      success: false,
-      msg: ('Could not add the system. Error: ' + err)
-    });
-  }
+  System.addSystem(newSystem, function(err, system) {
+    if (err) {
+      res.json({
+        success: false,
+        msg: 'Could not add the system. Error: ' + err
+      });
+    } else if (system == null) {
+      res.json({
+        success: false,
+        msg: 'Could not add the system. Error: internal error'
+      });
+    } else {
+      res.json({
+        success: true,
+        msg: system.name + ' was saved'
+      });
+    }
+  });
 }
 
 function updateSystem(req, res) {
@@ -134,49 +140,47 @@ function updateSystem(req, res) {
     waterLevelCritical: req.body.waterLevelCritical
   });
 
-  try {
-    System.updateSystem(update, function(err, system) {
-      if (err) {
-        throw err;
-      } else if (system == null) {
-        throw new Error('id not found');
-      } else {
-        res.json({
-          success: true,
-          msg: system.name + ' was saved'
-        });
-      }
-    });
-  } catch (err) {
-    res.json({
-      success: false,
-      msg: ('Could not update the system. Error: ' + err)
-    });
-  }
+  System.updateSystem(update, function(err, system) {
+    if (err) {
+      res.json({
+        success: false,
+        msg: 'Could not update the system. Error: ' + err
+      });
+    } else if (system == null) {
+      res.json({
+        success: false,
+        msg: 'Could not update the system. Error: ID not found'
+      });
+    } else {
+      res.json({
+        success: true,
+        msg: system.name + ' was saved'
+      });
+    }
+  });
 }
 
 function deleteSystem(req, res) {
   var id = req.headers.id;
 
-  try {
-    System.removeSystemById(id, function(err, system) {
-      if (err || system) {
-        throw err;
-      } else if (system == null) {
-        throw new Error('id not found');
-      } else {
-        res.json({
-          success: true,
-          msg: system.name + ' was deleted'
-        });
-      }
-    });
-  } catch (err) {
-    res.json({
-      success: false,
-      msg: ('Could not delete the system. Error: ' + err)
-    });
-  }
+  System.removeSystemById(id, function(err, system) {
+    if (err) {
+      res.json({
+        success: false,
+        msg: 'Could not delete system. Error: ' + err
+      });
+    } else if (system == null) {
+      res.json({
+        success: false,
+        msg: 'Could not delete system. Error: ID not found'
+      });
+    } else {
+      res.json({
+        success: true,
+        msg: system.name + ' was deleted'
+      });
+    }
+  });
 }
 
 // Input Sectors ---------------------------------------------------------------
@@ -197,28 +201,32 @@ router.route('/system/input')
 function getInputSector(req, res) {
   var id = req.headers.id;
 
-  try {
-    if (id != null && id != undefined && id != "") {
-      ISector.getISectorById(id, function(err, sector) {
-        if (err) {
-          throw err;
-        } else if (sector == null) {
-          throw new Error('id not found');
-        } else {
-          res.json({
-            success: true,
-            msg: 'Retrieved the requested input sector',
-            sector: sector
-          });
-        }
-      });
-    } else {
-      throw new Error('this request requires a valid ID');
-    }
-  } catch (err) {
+  if (id != null && id != undefined && id != "") {
+    ISector.getISectorById(id, function(err, sector) {
+      if (err) {
+        res.json({
+          success: false,
+          msg: ('Could not retrieve the sector. Error: ' + err),
+          sector: undefined
+        });
+      } else if (sector == null) {
+        res.json({
+          success: false,
+          msg: ('Could not retrieve the sector. Error: ID not found'),
+          sector: undefined
+        });
+      } else {
+        res.json({
+          success: true,
+          msg: 'Retrieved the requested sector',
+          sector: sector
+        });
+      }
+    });
+  } else {
     res.json({
       success: false,
-      msg: ('Could not retrieve the sector. Error: ' + err),
+      msg: ('This request requires a valid ID'),
       sector: undefined
     });
   }
@@ -233,25 +241,24 @@ function addInputSector(req, res) {
     iEvents: req.body.iEvents
   });
 
-  try {
-    ISector.addISector(newSector, function(err, sector) {
-      if (err) {
-        throw err;
-      } else if (sector == null) {
-        throw new Error('id not found');
-      } else {
-        res.json({
-          success: true,
-          msg: sector.name + ' was saved.'
-        });
-      }
-    });
-  } catch (err) {
-    res.json({
-      success: false,
-      msg: ('Could not add the sector. Error: ' + err)
-    });
-  }
+  ISector.addISector(newSector, function(err, sector) {
+    if (err) {
+      res.json({
+        success: false,
+        msg: 'Could not add the sector. Error: ' + err
+      });
+    } else if (sector == null) {
+      res.json({
+        success: false,
+        msg: 'Could not add the sector. Error: internal error'
+      });
+    } else {
+      res.json({
+        success: true,
+        msg: sector.name + ' was saved'
+      });
+    }
+  });
 }
 
 function updateInputSector(req, res) {
@@ -263,57 +270,61 @@ function updateInputSector(req, res) {
     iEvents: req.body.iEvents
   });
 
-  try {
-    ISector.updateISector(update, function(err, sector) {
-      if (err) {
-        throw err;
-      } else if (sector == null) {
-        throw new Error('id not found');
-      } else {
-        res.json({
-          success: true,
-          msg: sector.name + ' was saved'
-        });
-      }
-    });
-  } catch (err) {
-    res.json({
-      success: false,
-      msg: ('Could not update the sector. Error: ' + err)
-    });
-  }
+  ISector.updateISector(update, function(err, sector) {
+    if (err) {
+      res.json({
+        success: false,
+        msg: 'Could not update the sector. Error: ' + err
+      });
+    } else if (sector == null) {
+      res.json({
+        success: false,
+        msg: 'Could not update the sector. Error: ID not found'
+      });
+    } else {
+      res.json({
+        success: true,
+        msg: sector.name + ' was saved'
+      });
+    }
+  });
 }
 
 function deleteInputSector(req, res) {
   var id = req.headers.id;
 
-  try {
-    ISector.detachISectorById(id, function(err, sector) {
-      if (err) {
-        throw err;
-      } else if (sector == null) {
-        throw new Error('coudl not detach. ID not found');
-      } else {
-        ISector.removeISectorById(id, function(err, sector) {
-          if (err) {
-            throw err;
-          } else if (sector == null) {
-            throw new Error('id not found');
-          } else {
-            res.json({
-              success: true,
-              msg: sector.name + ' was deleted'
-            });
-          }
-        });
-      }
-    });
-  } catch (err) {
-    res.json({
-      success: false,
-      msg: ('Could not delete the sector. Error: ' + err)
-    });
-  }
+  ISector.detachISectorById(id, function(err, sector) {
+    if (err || sector) {
+      res.json({
+        success: false,
+        msg: 'Could not detach the sector. Error: ' + err
+      });
+    } else if (sector == null) {
+      res.json({
+        success: false,
+        msg: 'Could not detach the sector. Error: ID not found'
+      });
+    } else {
+      ISector.removeISectorById(id, function(err, sector) {
+        if (err) {
+          res.json({
+            success: false,
+            msg: 'Could not delete the sector. Error: ' + err
+          });
+        } else if (sector == null) {
+          res.json({
+            success: false,
+            msg: 'Could not delete the sector. Error: internal error'
+          });
+        } else {
+          res.json({
+            success: true,
+            msg: sector.name + ' was deleted'
+          });
+        }
+      });
+    }
+  });
 }
 
 // Output Sectors --------------------------------------------------------------
@@ -334,28 +345,32 @@ router.route('/system/output')
 function getOutputSector(req, res) {
   var id = req.headers.id;
 
-  try {
-    if (id != null && id != undefined && id != "") {
-      OSector.getOSectorById(id, function(err, sector) {
-        if (err) {
-          throw err;
-        } else if (sector == null) {
-          throw new Error('id not found');
-        } else {
-          res.json({
-            success: true,
-            msg: 'Retrieved the requested output sector',
-            sector: sector
-          });
-        }
-      });
-    } else {
-      throw new Error('this request requires a valid id');
-    }
-  } catch (err) {
+  if (id != null && id != undefined && id != "") {
+    OSector.getOSectorById(id, function(err, sector) {
+      if (err) {
+        res.json({
+          success: false,
+          msg: ('Could not retrieve the sector. Error: ' + err),
+          sector: undefined
+        });
+      } else if (sector == null) {
+        res.json({
+          success: false,
+          msg: ('Could not retrieve the sector. Error: ID not found'),
+          sector: undefined
+        });
+      } else {
+        res.json({
+          success: true,
+          msg: 'Retrieved the requested sector',
+          sector: sector
+        });
+      }
+    });
+  } else {
     res.json({
       success: false,
-      msg: ('Could not retrieve the sector. Error: ' + err),
+      msg: ('This request requires a valid ID'),
       sector: undefined
     });
   }
@@ -370,25 +385,24 @@ function addOutputSector(req, res) {
     oEvents: req.body.oEvents
   });
 
-  try {
-    OSector.addOSector(newSector, function(err, sector) {
-      if (err) {
-        throw err;
-      } else if (sector == null) {
-        throw new Error('id not found');
-      } else {
-        res.json({
-          success: true,
-          msg: sector.name + ' was saved.'
-        });
-      }
-    });
-  } catch (err) {
-    res.json({
-      success: false,
-      msg: ('Could not add the sector. Error: ' + err)
-    });
-  }
+  OSector.addOSector(newSector, function(err, sector) {
+    if (err) {
+      res.json({
+        success: false,
+        msg: 'Could not add the sector. Error: ' + err
+      });
+    } else if (sector == null) {
+      res.json({
+        success: false,
+        msg: 'Could not add the sector. Error: ID not found'
+      });
+    } else {
+      res.json({
+        success: true,
+        msg: sector.name + ' was saved'
+      });
+    }
+  });
 }
 
 function updateOutputSector(req, res) {
@@ -400,57 +414,61 @@ function updateOutputSector(req, res) {
     oEvents: req.body.oEvents
   });
 
-  try {
-    OSector.updateOSector(update, function(err, sector) {
-      if (err) {
-        throw err;
-      } else if (sector == null) {
-        throw new Error('id not found');
-      } else {
-        res.json({
-          success: true,
-          msg: sector.name + ' was saved'
-        });
-      }
-    });
-  } catch (err) {
-    res.json({
-      success: false,
-      msg: ('Could not update the sector. Error: ' + err)
-    });
-  }
+  OSector.updateOSector(update, function(err, sector) {
+    if (err) {
+      res.json({
+        success: false,
+        msg: 'Could not update the sector. Error: ' + err
+      });
+    } else if (sector == null) {
+      res.json({
+        success: false,
+        msg: 'Could not update the sector. Error: ID not found'
+      });
+    } else {
+      res.json({
+        success: true,
+        msg: sector.name + ' was saved'
+      });
+    }
+  });
 }
 
 function deleteOutputSector(req, res) {
   var id = req.headers.id;
 
-  try {
-    OSector.detachOSectorById(id, function(err, sector) {
-      if (err) {
-        throw err;
-      } else if (sector == null) {
-        throw new Error('could not detach. id not found');
-      } else {
-        OSector.removeOSectorById(id, function(err, sector) {
-          if (err) {
-            throw err;
-          } else if (sector == null) {
-            throw new Error('id not found');
-          } else {
-            res.json({
-              success: true,
-              msg: sector.name + ' was deleted'
-            });
-          }
-        });
-      }
-    });
-  } catch (err) {
-    res.json({
-      success: false,
-      msg: ('Could not delete the sector. Error: ' + err)
-    });
-  }
+  OSector.detachOSectorById(id, function(err, sector) {
+    if (err) {
+      res.json({
+        success: false,
+        msg: 'Could not detach the sector. Error: ' + err
+      });
+    } else if (sector == null) {
+      res.json({
+        success: false,
+        msg: 'Could not detach the sector. Error: ID not found'
+      });
+    } else {
+      OSector.removeOSectorById(id, function(err, sector) {
+        if (err) {
+          res.json({
+            success: false,
+            msg: 'Could not delete the sector. Error: ' + err
+          });
+        } else if (sector == null) {
+          res.json({
+            success: false,
+            msg: 'Could not delete the sector. Error: internal error'
+          });
+        } else {
+          res.json({
+            success: true,
+            msg: sector.name + ' was deleted'
+          });
+        }
+      });
+    }
+  });
 }
 
 // Output Events ---------------------------------------------------------------
@@ -471,28 +489,32 @@ router.route('/system/output/event')
 function getOutputEvent(req, res) {
   var id = req.headers.id;
 
-  try {
-    if (id != null && id != undefined && id != "") {
-      OEvent.getOEventById(id, function(err, oEvent) {
-        if (err) {
-          throw err;
-        } else if (oEvent == null) {
-          throw new Error('id not found');
-        } else {
-          res.json({
-            success: true,
-            msg: 'Retrieved the requested output event',
-            oEvent: oEvent
-          });
-        }
-      });
-    } else {
-      throw new Error('this request requires a valid id');
-    }
-  } catch (err) {
+  if (id != null && id != undefined && id != "") {
+    OEvent.getOEventById(id, function(err, oEvent) {
+      if (err) {
+        res.json({
+          success: false,
+          msg: ('Could not retrieve the event. Error: ' + err),
+          oEvent: undefined
+        });
+      } else if (oEvent == null) {
+        res.json({
+          success: false,
+          msg: ('Could not retrieve the event. Error: ID not found'),
+          oEvent: undefined
+        });
+      } else {
+        res.json({
+          success: true,
+          msg: 'Retrieved the requested event',
+          oEvent: oEvent
+        });
+      }
+    });
+  } else {
     res.json({
       success: false,
-      msg: ('Could not retrieve the event. Error: ' + err),
+      msg: ('This request requires a valid ID'),
       oEvent: undefined
     });
   }
@@ -507,25 +529,24 @@ function addOutputEvent(req, res) {
     interval: req.body.interval
   });
 
-  try {
-    OEvent.addOEvent(newEvent, function(err, oEvent) {
-      if (err) {
-        throw err;
-      } else if (oEvent == null) {
-        throw new Error('id not found');
-      } else {
-        res.json({
-          success: true,
-          msg: oEvent.tag + ' was saved.'
-        });
-      }
-    });
-  } catch (err) {
-    res.json({
-      success: false,
-      msg: ('Could not add the event. Error: ' + err)
-    });
-  }
+  OEvent.addOEvent(newEvent, function(err, oEvent) {
+    if (err) {
+      res.json({
+        success: false,
+        msg: 'Could not add the event. Error: ' + err
+      });
+    } else if (oEvent == null) {
+      res.json({
+        success: false,
+        msg: 'Could not add the event. Error: ID not found'
+      });
+    } else {
+      res.json({
+        success: true,
+        msg: oEvent.tag + ' was saved'
+      });
+    }
+  });
 }
 
 function updateOutputEvent(req, res) {
@@ -536,57 +557,61 @@ function updateOutputEvent(req, res) {
     interval: req.body.interval
   });
 
-  try {
-    OEvent.updateOEvent(update, function(err, oEvent) {
-      if (err) {
-        throw err;
-      } else if (oEvent == null) {
-        throw new Error('id not found');
-      } else {
-        res.json({
-          success: true,
-          msg: oEvent.tag + ' was saved'
-        });
-      }
-    });
-  } catch (err) {
-    res.json({
-      success: false,
-      msg: ('Could not update the event. Error: ' + err)
-    });
-  }
+  OEvent.updateOEvent(update, function(err, oEvent) {
+    if (err) {
+      res.json({
+        success: false,
+        msg: 'Could not update the event. Error: ' + err
+      });
+    } else if (oEvent == null) {
+      res.json({
+        success: false,
+        msg: 'Could not update the event. Error: ID not found'
+      });
+    } else {
+      res.json({
+        success: true,
+        msg: oEvent.tag + ' was saved'
+      });
+    }
+  });
 }
 
 function deleteOutputSector(req, res) {
   var id = req.headers.id;
 
-  try {
-    OEvent.detachOEventById(id, function(err, oEvent) {
-      if (err) {
-        throw err;
-      } else if (oEvent == null) {
-        throw new Error('could not detach. Id not found');
-      } else {
-        OEvent.removeOEventById(id, function(err, oEvent) {
-          if (err) {
-            throw err;
-          } else if (oEvent == null) {
-            throw new Error('id not found');
-          } else {
-            res.json({
-              success: true,
-              msg: oEvent.tag + ' was deleted'
-            });
-          }
-        });
-      }
-    });
-  } catch (err) {
-    res.json({
-      success: false,
-      msg: ('Could not delete the event. Error: ' + err)
-    });
-  }
+  OSector.detachOSectorById(id, function(err, oEvent) {
+    if (err) {
+      res.json({
+        success: false,
+        msg: 'Could not detach the event. Error: ' + err
+      });
+    } else if (oEvent == null) {
+      res.json({
+        success: false,
+        msg: 'Could not detach the event. Error: ID not found'
+      });
+    } else {
+      OSector.removeOSectorById(id, function(err, oEvent) {
+        if (err) {
+          res.json({
+            success: false,
+            msg: 'Could not delete the sector. Error: ' + err
+          });
+        } else if (oEvent == null) {
+          res.json({
+            success: false,
+            msg: 'Could not delete the sector. Error: internal error'
+          });
+        } else {
+          res.json({
+            success: true,
+            msg: oEvent.tag + ' was deleted'
+          });
+        }
+      });
+    }
+  });
 }
 
 module.exports = router;

@@ -63,27 +63,32 @@ module.exports.getSectorOEvents = function(sector, callback) {
 module.exports.addOEvent = function(oEvent, callback) {
   oEvent.save(function(err, oEvent) {
     if (err) {
-      throw err;
-    }
+      callback(err, null);
 
-    if (oEvent == null) {
-      throw new Error('event could not be found');
-    }
-    // Add the id to the output sectors events
-    OEvent.findOne(oEvent).populate('sector').exec(function(err, oEvent) {
-      if (err) {
-        throw err;
-      }
+    } else if (oEvent == null) {
+      callback(null, null);
 
-      oEvent.sector.oEvents.push(oEvent._id);
-      oEvent.sector.save(function(err, sector) {
+    } else {
+      // Add the id to the output sectors events
+      OEvent.findOne(oEvent).populate('sector').exec(function(err, oEvent) {
         if (err) {
-          throw err;
+          callback(err, null);
+
+        } else if (oEvent == null) {
+          callback(null, null);
+
+        } else {
+          oEvent.sector.oEvents.push(oEvent._id);
+          oEvent.sector.save(function(err, sector) {
+            if (err) {
+              callback(err, null);
+            } else {
+              callback(null, sector);
+            }
+          });
         }
       });
-    });
-
-    callback(null, sector);
+    }
   });
 };
 
@@ -91,19 +96,19 @@ module.exports.addOEvent = function(oEvent, callback) {
  module.exports.updateOEvent = function(oEvent, callback) {
   OEvent.findById(oEvent._id, function(err, dbOEvent) {
     if (err) {
-      throw err;
+      callback(err, null);
+
+    } else if (dbOEvent == null) {
+      callback(null, null);
+
+    } else {
+      dbOEvent.tag = oEvent.tag;
+      dbOEvent.start = oEvent.start;
+      dbOEvent.duration = oEvent.duration;
+      dbOEvent.interval = oEvent.interval;
+
+      dbOEvent.save(callback);
     }
-
-    if (dbOEvent == null) {
-      throw new Error('event could not be found');
-    }
-
-    dbOEvent.tag = oEvent.tag;
-    dbOEvent.start = oEvent.start;
-    dbOEvent.duration = oEvent.duration;
-    dbOEvent.interval = oEvent.interval;
-
-    dbOEvent.save(callback);
   });
 };
 
@@ -111,9 +116,13 @@ module.exports.addOEvent = function(oEvent, callback) {
 module.exports.removeOEventById = function(id, callback) {
   OEvent.findById(id, function(err, oEvent) {
     if (err) {
-      throw err;
-    }
+      callback(err, null);
 
-    oEvent.remove(callback);
+    } else if (oEvent == null) {
+      callback(null, null);
+
+    } else {
+      oEvent.remove(callback);
+    }
   });
 };
