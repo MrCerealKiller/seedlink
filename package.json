@@ -6,7 +6,8 @@
   "description": "IoT Platform for custom greenhouse solutions.",
   "private": true,
   "scripts": {
-    "start": "nodejs .app.js"
+    "start": "nodejs .app.js",
+    "test": "mocha"
   },
   "dependencies": {
     "bluebird": "^3.5.2",

@@ -1,35 +1,24 @@
+/**
+ * @file Test Input Event Model
+ * @author Jeremy Mallette
+ * @version 0.0.0
+ * @module Test/Models/IEvent
+ */
+
 // Dependencies ----------------------------------------------------------------
-const bluebird      = require('bluebird');
-const mongoose      = require('mongoose');
+const mongoose = require('mongoose');
+const assert   = require('chai').assert;
 
 // Local Dependencies ----------------------------------------------------------
 const IEvent = require('../../models/ievent');
-const db     = require('../../config/database'); // Development configuration
-
-// Aserrtions ------------------------------------------------------------------
-var assert = require('chai').assert;
 
 // Test Suite ------------------------------------------------------------------
 describe('Input Event', function() {
 
-  before('Connecting to test database', function(done) {
-    mongoose.connect((process.env.MONGO_URL || db.test_database), db.opts);
-    mongoose.Promise = bluebird;
-
-    mongoose.connection.on('connected', function() {
-        console.log('Sucessfully connected to database\n');
-        done();
-    });
-
-    mongoose.connection.on('error', function(err) {
-        throw new Error('Error connecting to database\nError: ' + err + '\n');
-        done()
-    });
-  });
-
   // Get event by ID -----------------------------------------------------------
-  describe('.getIEventById', function() {
+  describe('#getIEventById', function() {
     context('Invalid ID', function() {
+      var invalidId = 'na123';
       it('should return an error and null', function(done) {
         IEvent.getIEventById(invalidId, function(err, ret) {
           assert.isNotNull(err);
@@ -39,6 +28,7 @@ describe('Input Event', function() {
       });
     });
     context('Unknown ID', function() {
+      var unknownId = '324567889';
       it('should return no error and null', function (done) {
         IEvent.getIEventById(unknownId, function(err, ret) {
           assert.isNull(err);
@@ -48,6 +38,7 @@ describe('Input Event', function() {
       });
     });
     context('Known ID', function() {
+      var knownId = '32456789898765434';
       it('should return no error and an IEvent object', function(done) {
         IEvent.getIEventById(validId, function(err, ret) {
           assert.isNull(err);
@@ -61,8 +52,9 @@ describe('Input Event', function() {
   });
 
   // Get event by tag ----------------------------------------------------------
-  describe('.getIEventByTag', function() {
+  describe('#getIEventByTag', function() {
     context('Invalid Tag', function() {
+      var invalidTag = 99;
       it('should return an error and null', function(done) {
         IEvent.getIEventByTag(invalidTag, function(err, ret) {
           assert.isNotNull(err);
@@ -72,6 +64,7 @@ describe('Input Event', function() {
       });
     });
     context('Unknown Tag', function() {
+      var unknownTag = 'UnknownEvent';
       it('should return no error and null', function (done) {
         IEvent.getIEventByTag(unknownTag, function(err, ret) {
           assert.isNull(err);
@@ -81,6 +74,7 @@ describe('Input Event', function() {
       });
     });
     context('Known Tag', function() {
+      var validTag = 'TestEvent1';
       it('should return no error and an IEvent object', function(done) {
         IEvent.getIEventByTag(validTag, function(err, ret) {
           assert.isNull(err);
@@ -94,8 +88,9 @@ describe('Input Event', function() {
   });
 
   // Get sector events ---------------------------------------------------------
-  describe('.getSectorIEvents', function() {
+  describe('#getSectorIEvents', function() {
     context('Invalid Sector', function() {
+      var invalidSector = 99;
       it('should return an error and null', function(done) {
         IEvent.getSectorIEvents(invalidSector, function(err, ret) {
           assert.isNotNull(err);
@@ -105,6 +100,7 @@ describe('Input Event', function() {
       });
     });
     context('Unused Sector', function() {
+      var unknownSector = '1234567890';
       it('should return no error and null', function (done) {
         IEvent.getSectorIEvents(unknownSector, function(err, ret) {
           assert.isNull(err);
@@ -114,6 +110,7 @@ describe('Input Event', function() {
       });
     });
     context('Used Sector', function() {
+      var validSector = '123456789';
       it('should return no error and a list of IEvent objects', function(done) {
         IEvent.getIEventById(validSector, function(err, ret) {
           assert.isNull(err);
