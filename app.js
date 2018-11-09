@@ -1,5 +1,5 @@
 /**
- * @file Root of Express Server
+ * @file Seedlink Server
  * @author Jeremy Mallette
  * @version 0.0.0
  * @module App/Server
@@ -11,7 +11,6 @@
 
 // Constants -------------------------------------------------------------------
 const _PORT = 3000;
-const _PORT_PRODUCTION = 80;
 
 // Imports ---------------------------------------------------------------------
 const express       = require('express');
@@ -24,9 +23,9 @@ const mongoose      = require('mongoose');
 const path          = require('path');
 
 // Local Modules ---------------------------------------------------------------
-const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
-const db          = require('./config/database');
+const indexRouter   = require('./routes/index');
+const usersRouter   = require('./routes/users');
+const db            = require('./config/database');
 
 // Paths -----------------------------------------------------------------------
 var staticPath = path.join(__dirname, 'public');
@@ -39,7 +38,7 @@ var app = express();
 // ##############
 
 // Initialize Mongoose ---------------------------------------------------------
-mongoose.connect(db.database, db.opts);
+mongoose.connect((process.env.MONGO_URL || db.url) + db.database, db.opts);
 mongoose.Promise = bluebird;
 
 mongoose.connection.on('connected', function() {
@@ -47,7 +46,7 @@ mongoose.connection.on('connected', function() {
 });
 
 mongoose.connection.on('error', function(err) {
-    console.log('Error connecting to database: ' + err + '\n');
+    console.log('Error connecting to database\nError: ' + err + '\n');
 });
 
 // ################
@@ -71,7 +70,7 @@ app.use(cookieParser());
 // #####################
 
 // Set Port --------------------------------------------------------------------
-app.set('port', process.env.PORT || _PORT);
+app.set('port', (process.env.PORT || _PORT));
 
 // Routes ----------------------------------------------------------------------
 app.use('/', indexRouter);
@@ -84,7 +83,7 @@ app.use(function(req, res) {
 
 // Listen to Port --------------------------------------------------------------
 app.listen(app.get('port'), function() {
-    console.log('Server started on http://localhost:' + app.get('port'));
+    console.log('Server started on port: ' + app.get('port'));
 });
 
 module.exports = app;

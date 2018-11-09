@@ -7,7 +7,9 @@
 
 // Database Configs ------------------------------------------------------------
 module.exports = {
-    database: 'mongodb://localhost:27017/seedlink',
+    url: 'mongodb://localhost:27017/',
+    database: 'seedlink',
+    test_database: 'test_seedlink',
     opts: {useMongoClient: true},
     key: 'rosemary-thyme-basil-oregano-coriander-2019'
 }
