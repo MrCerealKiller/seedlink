@@ -46,9 +46,9 @@ describe('Input Sector', function() {
             key: 1
           });
 
-          newSector.save(function(err, sector) {
+          ISector.addISector(newSector, function(err, sector) {
             assert.isNotNull(err, 'expected error; returned none');
-            assert.isUndefined(sector, 'expected no sector; returned sector');
+            assert.isNull(sector, 'expected no sector; returned sector');
             done();
           });
         });
@@ -61,9 +61,9 @@ describe('Input Sector', function() {
             key: 1
           });
 
-          newSector.save(function(err, sector) {
+          ISector.addISector(newSector, function(err, sector) {
             assert.isNotNull(err, 'expected error; returned none');
-            assert.isUndefined(sector, 'expected no sector; returned sector');
+            assert.isNull(sector, 'expected no sector; returned sector');
             done();
           });
         });
@@ -76,9 +76,9 @@ describe('Input Sector', function() {
             type: 'Temperature'
           });
 
-          newSector.save(function(err, sector) {
+          ISector.addISector(newSector, function(err, sector) {
             assert.isNotNull(err, 'expected error; returned none');
-            assert.isUndefined(sector, 'expected no sector; returned sector');
+            assert.isNull(sector, 'expected no sector; returned sector');
             done();
           });
         });
@@ -94,14 +94,15 @@ describe('Input Sector', function() {
             key: 1
           });
 
-          newSector.save(function(err, sector) {
+          ISector.addISector(newSector, function(err, sector) {
             assert.isNull(err, 'expected no error; returned error');
             assert.isNotNull(sector, 'expected sector; returned none');
             assert.instanceOf(sector, ISector,
                               'object was not of type ISector');
             assert.equal(sector.name, newSector.name,
                          'unexpected name property');
-            assert.equal(sector.system, that.systemId,
+            assert.equal(sector.system._id.toString(),
+                         that.systemId.toString(),
                          'unexpected system property');
             assert.equal(sector.type, newSector.type,
                          'unexpected type property');
@@ -120,14 +121,15 @@ describe('Input Sector', function() {
             key: 1
           });
 
-          newSector.save(function(err, sector) {
+          ISector.addISector(newSector, function(err, sector) {
             assert.isNull(err, 'expected no error; returned error');
             assert.isNotNull(sector, 'expected sector; returned none');
             assert.instanceOf(sector, ISector,
                               'object was not of type ISector');
             assert.equal(sector.name, newSector.name,
                          'unexpected name property');
-            assert.equal(sector.system, that.systemId,
+            assert.equal(sector.system._id.toString(),
+                         that.systemId.toString(),
                          'unexpected system property');
             assert.equal(sector.type, newSector.type,
                          'unexpected type property');
@@ -146,14 +148,15 @@ describe('Input Sector', function() {
             key: 1
           });
 
-          newSector.save(function(err, sector) {
+          ISector.addISector(newSector, function(err, sector) {
             assert.isNull(err, 'expected no error; returned error');
             assert.isNotNull(sector, 'expected sector; returned none');
             assert.instanceOf(sector, ISector,
                               'object was not of type ISector');
             assert.equal(sector.name, newSector.name,
                          'unexpected name property');
-            assert.equal(sector.system, that.systemId,
+            assert.equal(sector.system._id.toString(),
+                         that.systemId.toString(),
                          'unexpected system property');
             assert.equal(sector.type, newSector.type,
                          'unexpected type property');
@@ -172,14 +175,15 @@ describe('Input Sector', function() {
             key: 1
           });
 
-          newSector.save(function(err, sector) {
+          ISector.addISector(newSector, function(err, sector) {
             assert.isNull(err, 'expected no error; returned error');
             assert.isNotNull(sector, 'expected sector; returned none');
             assert.instanceOf(sector, ISector,
                               'object was not of type ISector');
             assert.equal(sector.name, newSector.name,
                          'unexpected name property');
-            assert.equal(sector.system, that.systemId,
+            assert.equal(sector.system._id.toString(),
+                         that.systemId.toString(),
                          'unexpected system property');
             assert.equal(sector.type, newSector.type,
                          'unexpected type property');
@@ -198,15 +202,15 @@ describe('Input Sector', function() {
             key: 1
           });
 
-          newSector.save(function(err, sector) {
+          ISector.addISector(newSector, function(err, sector) {
             assert.isNull(err, 'expected no error; returned error');
             assert.isNotNull(sector, 'expected sector; returned none');
             assert.instanceOf(sector, ISector,
                               'object was not of type ISector');
-            System.getSytemById(that.systemId, function(err, system) {
-              assert.equal(system.iEvents.length, 1,
+            System.getSystemById(that.systemId, function(err, system) {
+              assert.equal(system.inputSectors.length, 1,
                            'expected only one event in parent');
-              assert.equal(system.iEvents[0], sector._id,
+              assert.equal(system.inputSectors[0].toString(), sector._id,
                            'id was not properly added to parent system');
               done();
             });
@@ -413,7 +417,7 @@ describe('Input Sector', function() {
       });
 
       context('Valid', function() {
-        it('should pass and update a system object', function(done) {
+        it('should pass and update a sector', function(done) {
           var that = this;
           var validSector = new ISector({
             _id: that.validId,
