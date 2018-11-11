@@ -7,8 +7,8 @@
 
 // Imports -----------------------------------------------------------------------------
 const mongoose  = require('mongoose');
-const InputSector = require('./isector');
-const OutputSector = require('./osector');
+const ISector = require('./isector');
+const OSector = require('./osector');
 
 // Create Models -----------------------------------------------------------------------
 const systemSchema = mongoose.Schema({
@@ -131,7 +131,7 @@ module.exports.removeSystemById = function(id, callback) {
     } else {
       // Remove all of the children input sectors
       system.inputSectors.forEach(function(sector) {
-        InputSector.removeISectorById(sector, function(err) {
+        ISector.removeISectorById(sector, function(err) {
           if (err) {
             throw err;
           }
@@ -140,7 +140,7 @@ module.exports.removeSystemById = function(id, callback) {
 
       // Remove all of the children output sectors
       system.outputSectors.forEach(function(sector) {
-        OutputSector.removeOSectorById(sector, function(err) {
+        OSector.removeOSectorById(sector, function(err) {
           if (err) {
             throw err;
           }
