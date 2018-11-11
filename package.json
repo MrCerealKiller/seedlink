@@ -6,7 +6,8 @@
   "description": "IoT Platform for custom greenhouse solutions.",
   "private": true,
   "scripts": {
-    "start": "nodejs .app.js"
+    "start": "nodejs .app.js",
+    "test": "mocha"
   },
   "dependencies": {
     "bluebird": "^3.5.2",
@@ -17,5 +18,9 @@
     "mongoose": "^4.13.7",
     "morgan": "^1.9.0",
     "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^5.2.0"
   }
 }
