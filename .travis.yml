@@ -22,24 +22,18 @@ cache:
   directories:
     "node_modules"
 
+# Jobs ########################################################################
 jobs:
   include:
-    # PRE-CACHE ###############################################################
-    - stage: pre cache
-      install: false
-      env:
-        - NODE_ENV=development
-      before_install:
-        - sudo apt-get update
-      install:
-        - npm install
-      script: skip
-    # TEST ####################################################################
     - stage: test
       install: true
       env:
         - NODE_ENV=development
-        - MONGO_URL="https://127.0.0.1:27017/"
+        - MONGO_URL="https://127.0.0.1:27017/
+      before_install:
+        - sudo apt-get update
+      install:
+        - npm install
       before_script:
         - sleep 15
       script:
