@@ -10,7 +10,9 @@ const mongoose = require('mongoose');
 const assert   = require('chai').assert;
 
 // Local Dependencies ----------------------------------------------------------
-const System = require('../../models/system');
+const System   = require('../../models/system');
+const OSector  = require('../../models/osector');
+const ISector  = require('../../models/isector');
 
 // Test Suite ------------------------------------------------------------------
 describe('System', function() {
@@ -25,8 +27,8 @@ describe('System', function() {
 
     // Add System --------------------------------------------------------------
     describe('#addSystem', function() {
-      context('Invalid System', function() {
-        it('should fail by missing name', function(done) {
+      context('Invalid', function() {
+        it('should fail due to missing name property', function(done) {
           var that = this;
           var system = new System({
             pascode: that.validPass,
@@ -34,12 +36,13 @@ describe('System', function() {
             outputPort: that.validOPort
           });
 
-          system.save(function(err, system) {
-            assert.isNotNull(err, 'error was null');
-            assert.isUndefined(system, 'returned an object');
+          System.addSystem(system, function(err, system) {
+            assert.isNotNull(err, 'expected error; returned none');
+            assert.isUndefined(system, 'expected no system; returned system');
             done();
           });
         });
+
         // it('should fail by duplicate name', function(done) {
         //   var that = this;
         //   var system = new System({
@@ -64,7 +67,8 @@ describe('System', function() {
         //     });
         //   });
         // });
-        it('should fail by missing passcode', function(done) {
+
+        it('should fail due to missing passcode property', function(done) {
           var that = this;
           var system = new System({
             name: that.validName,
@@ -72,13 +76,14 @@ describe('System', function() {
             outputPort: that.validOPort
           });
 
-          system.save(function(err, system) {
-            assert.isNotNull(err, 'error was null');
-            assert.isUndefined(system, 'returned an object');
+          System.addSystem(system, function(err, system) {
+            assert.isNotNull(err, 'expected error; returned none');
+            assert.isUndefined(system, 'expected no system; returned system');
             done();
           });
         });
-        it('should fail by missing input port', function(done) {
+
+        it('should fail due to missing input port property', function(done) {
           var that = this;
           var system = new System({
             name: that.validName,
@@ -86,13 +91,14 @@ describe('System', function() {
             outputPort: that.validOPort
           });
 
-          system.save(function(err, system) {
-            assert.isNotNull(err, 'error was null');
-            assert.isUndefined(system, 'returned an object');
+          System.addSystem(system, function(err, system) {
+            assert.isNotNull(err, 'expected error; returned none');
+            assert.isUndefined(system, 'expected no system; returned system');
             done();
           });
         });
-        it('should fail by invalid output port', function(done) {
+
+        it('should fail due to missing output port property', function(done) {
           var that = this;
           var system = new System({
             name: that.validName,
@@ -100,15 +106,16 @@ describe('System', function() {
             inputPort: that.validIPort
           });
 
-          system.save(function(err, system) {
-            assert.isNotNull(err, 'error was null');
-            assert.isUndefined(system, 'returned an object');
+          System.addSystem(system, function(err, system) {
+            assert.isNotNull(err, 'expected error; received none');
+            assert.isUndefined(system, 'expected no system; returned system');
             done();
           });
         });
       });
-      context('Valid System', function() {
-        it('should pass with valid input', function(done) {
+
+      context('Valid', function() {
+        it('should pass due to valid input', function(done) {
           var that = this;
           var system = new System({
             name: that.validName,
@@ -117,12 +124,12 @@ describe('System', function() {
             outputPort: that.validOPort
           });
 
-          var name = system.name;
-          system.save(function(err, system) {
-            assert.isNull(err, 'returned an error');
-            assert.isNotNull(system, 'did not return an object');
-            assert.instanceOf(system, System, 'object is not a System');
-            assert.equal(system.name, name, 'unexpected name');
+          System.addSystem(system, function(err, system) {
+            assert.isNull(err, 'expected no error; returned error');
+            assert.isNotNull(system, 'expected system; returned none');
+            assert.instanceOf(system, System, 'object was not of type System');
+            assert.equal(system.name, that.validName,
+                         'unexpected name property');
             done();
           });
         });
@@ -130,7 +137,7 @@ describe('System', function() {
     });
   });
 
-// Read ------------------------------------------------------------------------
+  // Read ----------------------------------------------------------------------
   describe('Read', function() {
     before('setting constants', function() {
       this.invalidId   = 99;
@@ -142,26 +149,26 @@ describe('System', function() {
       this.validName2  = 'TestSystem2';
     });
 
-    beforeEach('Create Systems', function(done) {
-      var name1 = this.validName1;
-      var name2 = this.validName2;
-
-      var testSystem1 = new System({
-        name: name1,
-        passcode: 'test',
-        inputPort: '/dev/ttyUSB0',
-        outputPort: '/dev/ttyUSB1'
-      });
-      var testSystem2 = new System({
-        name: name2,
-        passcode: 'test',
-        inputPort: '/dev/ttyUSB0',
-        outputPort: '/dev/ttyUSB1'
-      });
+    beforeEach('creating test objects', function(done) {
       var that = this;
-      testSystem1.save(function(err, system1) {
+
+      var newSystem1 = new System({
+        name: that.validName1,
+        passcode: 'test',
+        inputPort: '/dev/ttyUSB0',
+        outputPort: '/dev/ttyUSB1'
+      });
+
+      var newSystem2 = new System({
+        name: that.validName2,
+        passcode: 'test',
+        inputPort: '/dev/ttyUSB0',
+        outputPort: '/dev/ttyUSB1'
+      });
+
+      newSystem1.save(function(err, system1) {
         that.validId = system1._id;
-        testSystem2.save(function(err, system2) {
+        newSystem2.save(function(err, system2) {
           done();
         });
       });
@@ -169,34 +176,34 @@ describe('System', function() {
 
     // Get system by ID --------------------------------------------------------
     describe('#getSytemById', function() {
-      context('Invalid ID', function() {
-        it('should return an error and undefined', function(done) {
+      context('Invalid', function() {
+        it('should fail due to invalid ID', function(done) {
           System.getSystemById(this.invalidId, function(err, ret) {
-            assert.isNotNull(err, 'did not return an error');
-            assert.isUndefined(ret, 'returned an object');
+            assert.isNotNull(err, 'expected error; returned none');
+            assert.isUndefined(ret, 'expected no system; returned one');
             done();
           });
         });
-      });
-      context('Unknown ID', function() {
-        it('should return no error and null', function (done) {
+
+        it('should fail due to unknown ID', function (done) {
           System.getSystemById(this.unknownId, function(err, ret) {
-            assert.isNull(err, 'returned an error');
-            assert.isNull(ret, 'returned an object');
+            assert.isNull(err, 'expected no error; returned error');
+            assert.isNull(ret, 'expected no system; returned system');
             done();
           });
         });
       });
-      context('Known ID', function() {
-        it('should return no error and an System object', function(done) {
+
+      context('Valid', function() {
+        it('should pass and return the test system', function(done) {
           var that = this;
           System.getSystemById(this.validId, function(err, ret) {
-            assert.isNull(err, 'returned an error');
-            assert.isNotNull(ret, 'did not return an object');
-            assert.instanceOf(ret, System, 'object was not a System');
+            assert.isNull(err, 'expected no error; returned error');
+            assert.isNotNull(ret, 'expected system; returned none');
+            assert.instanceOf(ret, System, 'object was not of type System');
             assert.equal(ret._id.toString(),
                          that.validId.toString(),
-                         'unexpected id');
+                         'unexpected _id property');
             done();
           });
         });
@@ -205,25 +212,26 @@ describe('System', function() {
 
     // Get System by name ------------------------------------------------------
     describe('#getSystemByName', function() {
-      context('Unknown Name', function() {
-        it('should return no error and null', function (done) {
+      context('Invalid', function() {
+        it('should fail due to undefined name', function (done) {
           System.getSystemByName(this.unknownName, function(err, ret) {
-            assert.isNull(err, 'returned an error');
-            assert.isNull(ret, 'returned an object');
+            assert.isNull(err, 'expected no error; returned error');
+            assert.isNull(ret, 'expected no system; returned system');
             done();
           });
         });
       });
-      context('Known Name', function() {
-        it('should return no error and a System object', function(done) {
+
+      context('Valid', function() {
+        it('should pass and return a system', function(done) {
           var that = this;
           System.getSystemByName(this.validName1, function(err, ret) {
-            assert.isNull(err, 'returned an error');
-            assert.isNotNull(ret, 'did not return an object');
-            assert.instanceOf(ret, System, 'object was not a System');
+            assert.isNull(err, 'expected no error; returned error');
+            assert.isNotNull(ret, 'expected system; returned none');
+            assert.instanceOf(ret, System, 'object was not of type System');
             assert.equal(ret.name.toString(),
                          that.validName1.toString(),
-                         'unexpected name');
+                         'unexpected name property');
             done();
           });
         });
@@ -233,14 +241,15 @@ describe('System', function() {
     // Get all systems ---------------------------------------------------------
     describe('#getAllSystems', function() {
       context('No Error', function() {
-        it('should return no error and a list of System objects', function(done) {
+        it('should pass and a list of System objects', function(done) {
           System.getAllSystems(function(err, ret) {
-            assert.isNull(err, 'returned an error');
-            assert.isNotNull(ret, 'did not return response');
+            assert.isNull(err, 'expected no error; returned error');
+            assert.isNotNull(ret, 'expected systems; returned none');
             assert.isArray(ret, 'response was not an Array');
             assert.equal(ret.length, 2, 'unexpected Array size');
             ret.forEach(function(item) {
-              assert.instanceOf(item, System, 'objects are not Systems');
+              assert.instanceOf(item, System,
+                                'objects are not of type Systems');
             });
             done();
           });
@@ -282,7 +291,7 @@ describe('System', function() {
       this.finWLCrit = '50';
     });
 
-    beforeEach('Create Systems', function(done) {
+    beforeEach('creating test objects', function(done) {
       var that = this;
       var testSystem = new System({
         name: that.initName,
@@ -298,6 +307,7 @@ describe('System', function() {
         waterLevelWarning: that.initWLWarn,
         waterLevelCritical: that.initWLCrit
       });
+
       testSystem.save(function(err, system) {
         that.validId = system._id;
         done();
@@ -306,32 +316,8 @@ describe('System', function() {
 
     // Update system by ID -----------------------------------------------------
     describe('#updateSystem', function() {
-      context('Invalid ID', function() {
-        it('should return an error and null', function(done) {
-          var that = this;
-          var invalidSys = new System({
-            name: that.finName,
-            passcode: that.finPass,
-            inputPort: that.finIPort,
-            outputPort: that.finOPort,
-            tempWarning: that.finTempWarn,
-            tempCritical: that.finTempCrit,
-            humidityWarning: that.finHumWarn,
-            humidityCritical: that.finHumCrit,
-            pHWarning: that.finPHWarn,
-            pHCritical: that.finPHCrit,
-            waterLevelWarning: that.finWLWarn,
-            waterLevelCritical: that.finWLCrit
-          });
-
-          System.updateSystem(invalidSys, function(err, ret) {
-            assert.isNull(ret, 'returned an object');
-            done();
-          });
-        });
-      });
-      context('Unknown ID', function() {
-        it('should return no error and null', function (done) {
+      context('Invalid', function() {
+        it('should fail due to unknown ID', function (done) {
           var that = this;
           var unknownSys = new System({
             _id: that.unknownId,
@@ -350,14 +336,15 @@ describe('System', function() {
           });
 
           System.updateSystem(unknownSys, function(err, ret) {
-            assert.isNull(err, 'returned an error');
-            assert.isNull(ret, 'returned an object');
+            assert.isNull(err, 'expected no error; returned error');
+            assert.isNull(ret, 'expected no system; returned system');
             done();
           });
         });
       });
-      context('Known ID', function() {
-        it('should return no error and an System object', function(done) {
+
+      context('Valid', function() {
+        it('should pass and update a system object', function(done) {
           var that = this;
           var system = new System({
             _id: that.validId,
@@ -376,49 +363,125 @@ describe('System', function() {
           });
 
           System.updateSystem(system, function(err, ret) {
-            assert.isNull(err, 'returned an error');
-            assert.isNotNull(ret, 'did not return an object');
-            assert.instanceOf(ret, System, 'object was not a System');
+            assert.isNull(err, 'expected no error; returned error');
+            assert.isNotNull(ret, 'expected system; returned none');
+            assert.instanceOf(ret, System, 'object was not of type System');
 
             assert.equal(ret._id.toString(),
                          that.validId.toString(),
-                         'id changed');
+                         'unexpected _id property');
             assert.equal(ret.name,
                          that.finName,
-                         'name unchanged');
+                         'name was unchanged');
             assert.equal(ret.passcode,
                          that.finPass,
-                         'passcode unchanged');
+                         'passcode was unchanged');
             assert.equal(ret.inputPort,
                          that.finIPort,
-                         'input port unchanged');
+                         'input port was unchanged');
             assert.equal(ret.outputPort,
                          that.finOPort,
-                         'output port unchanged');
+                         'output port was unchanged');
             assert.equal(ret.tempWarning,
                          that.finTempWarn,
-                         'temperature warning unchanged');
+                         'temperature warning was unchanged');
             assert.equal(ret.tempCritical,
                          that.finTempCrit,
-                         'critical temperature unchanged');
+                         'critical temperature was unchanged');
             assert.equal(ret.humidityWarning,
                          that.finHumWarn,
-                         'humidity warning unchanged');
+                         'humidity warning was unchanged');
             assert.equal(ret.humidityCritical,
                          that.finHumCrit,
-                         'critical humidity unchanged');
+                         'critical humidity was unchanged');
             assert.equal(ret.pHWarning,
                          that.finPHWarn,
-                         'pH warning unchanged');
+                         'pH warning was unchanged');
             assert.equal(ret.pHCritical,
                          that.finPHCrit,
-                         'critical pH unchanged');
+                         'critical pH was unchanged');
             assert.equal(ret.waterLevelWarning,
                          that.finWLWarn,
-                         'water level warning unchanged');
+                         'water level warning was unchanged');
             assert.equal(ret.waterLevelCritical,
                          that.finWLCrit,
-                         'critical water level unchanged');
+                         'critical water level was unchanged');
+            done();
+          });
+        });
+      });
+    });
+  });
+
+// Delete ----------------------------------------------------------------------
+  describe('Delete', function() {
+    before('setting constants', function() {
+      this.validName = 'TestSystem';
+      this.fakeId    = '5be16a873dde9a64dbedac38';
+      this.systemId  = null;
+      this.oSectorId = null;
+      this.iSectorId = null;
+    });
+
+    beforeEach('creating test objects', function(done) {
+      var that = this;
+      var oSector = new OSector({
+        name: 'Output Sector',
+        system: that.fakeId,
+        type: 'Water',
+        key: 1
+      });
+
+      oSector.save(function(err, oSector) {
+        that.oSectorId = oSector._id;
+        var iSector = new ISector({
+          name: 'Input Sector',
+          system: that.fakeId,
+          type: 'Temperature',
+          key: 1
+        });
+
+        iSector.save(function(err, iSector) {
+          that.iSectorId = iSector._id;
+          var system = new System({
+            name: that.validName,
+            passcode: 'test',
+            inputPort: '/dev/ttyUSB0',
+            inputSectors: [that.iSectorId],
+            outputPort: '/dev/ttyUSB1',
+            outputSectors: [that.oSectorId]
+          });
+
+          system.save(function(err, system) {
+            that.systemId = system._id;
+            done()
+          });
+        });
+      });
+    });
+
+    // Remove system by ID -----------------------------------------------------
+    describe('#removeSystemById', function() {
+      context('Invalid', function() {
+        it('should fail due to undefined ID', function (done) {
+          System.removeSystemById(null, function(err, ret) {
+            assert.isNull(err, 'expected no error; returned error');
+            assert.isNull(ret, 'expected no system; returned system');
+            done();
+          });
+        });
+      });
+
+      context('Valid', function() {
+        it('should pass and remove a system and its sectors', function(done) {
+          var that = this;
+          System.removeSystemById(that.systemId, function(err, ret) {
+            assert.isNull(err, 'expected no error; returned error');
+            assert.isNotNull(ret, 'expected system; returned none');
+            assert.instanceOf(ret, System, 'object was not of type System');
+            assert.equal(ret.name,
+                         that.validName,
+                         'unexpected name');
             done();
           });
         });
