@@ -33,7 +33,7 @@ const iEventSchema = mongoose.Schema({
   },
   duration: {
     type: Number,
-    required: true,
+    required: false,
     min: [0, 'Duration must be entered in seconds'],
     max: [36000, 'Please keep the duration less than 10 hrs']
   },

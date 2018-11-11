@@ -36,7 +36,7 @@ describe('System', function() {
             outputPort: that.validOPort
           });
 
-          system.save(function(err, system) {
+          System.addSystem(system, function(err, system) {
             assert.isNotNull(err, 'expected error; returned none');
             assert.isUndefined(system, 'expected no system; returned system');
             done();
@@ -76,7 +76,7 @@ describe('System', function() {
             outputPort: that.validOPort
           });
 
-          system.save(function(err, system) {
+          System.addSystem(system, function(err, system) {
             assert.isNotNull(err, 'expected error; returned none');
             assert.isUndefined(system, 'expected no system; returned system');
             done();
@@ -91,7 +91,7 @@ describe('System', function() {
             outputPort: that.validOPort
           });
 
-          system.save(function(err, system) {
+          System.addSystem(system, function(err, system) {
             assert.isNotNull(err, 'expected error; returned none');
             assert.isUndefined(system, 'expected no system; returned system');
             done();
@@ -106,7 +106,7 @@ describe('System', function() {
             inputPort: that.validIPort
           });
 
-          system.save(function(err, system) {
+          System.addSystem(system, function(err, system) {
             assert.isNotNull(err, 'expected error; received none');
             assert.isUndefined(system, 'expected no system; returned system');
             done();
@@ -124,7 +124,7 @@ describe('System', function() {
             outputPort: that.validOPort
           });
 
-          system.save(function(err, system) {
+          System.addSystem(system, function(err, system) {
             assert.isNull(err, 'expected no error; returned error');
             assert.isNotNull(system, 'expected system; returned none');
             assert.instanceOf(system, System, 'object was not of type System');
@@ -416,7 +416,8 @@ describe('System', function() {
 // Delete ----------------------------------------------------------------------
   describe('Delete', function() {
     before('setting constants', function() {
-      this.fakeId = '5be16a873dde9a64dbedac38';
+      this.validName = 'TestSystem';
+      this.fakeId    = '5be16a873dde9a64dbedac38';
       this.systemId  = null;
       this.oSectorId = null;
       this.iSectorId = null;
@@ -443,7 +444,7 @@ describe('System', function() {
         iSector.save(function(err, iSector) {
           that.iSectorId = iSector._id;
           var system = new System({
-            name: 'TestSystem',
+            name: that.validName,
             passcode: 'test',
             inputPort: '/dev/ttyUSB0',
             inputSectors: [that.iSectorId],
@@ -478,8 +479,8 @@ describe('System', function() {
             assert.isNull(err, 'expected no error; returned error');
             assert.isNotNull(ret, 'expected system; returned none');
             assert.instanceOf(ret, System, 'object was not of type System');
-            assert.equal(ret.name.toString(),
-                         that.validName1.toString(),
+            assert.equal(ret.name,
+                         that.validName,
                          'unexpected name');
             done();
           });
