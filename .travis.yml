@@ -1,0 +1,50 @@
+# SETUP #######################################################################
+sudo: true
+env:
+  global:
+    - TRAVIS_ALLOW_FAILURE=false
+
+language: node_js
+node_js:
+  - "stable"
+
+branches:
+  only:
+    - master
+    - dev
+    - /^release/*$/
+    - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
+
+services:
+  - mongodb
+
+cache:
+  directories:
+    "node_modules"
+
+jobs:
+  include:
+    # PRE-CACHE ###############################################################
+    - stage: pre cache
+      install: false
+      env:
+        - NODE_ENV=development
+      before_install:
+        - sudo apt-get update
+      install:
+        - npm install
+      script: skip
+    # TEST ####################################################################
+    - stage: test
+      install: true
+      env:
+        - NODE_ENV=development
+        - MONGO_URL="https://127.0.0.1:27017/"
+      before_script:
+        - sleep 15
+      script:
+        npm test
+
+# NOTIFICATIONS ###############################################################
+notifications:
+  email: false
