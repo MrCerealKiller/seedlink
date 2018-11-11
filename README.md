@@ -1,6 +1,6 @@
 # Seedlink
 
-![Travis (.com)](https://img.shields.io/travis/com/MrCerealKiller/seedlink.svg)
+![Travis (.com)](https://img.shields.io/travis/com/MrCerealKiller/seedlink/master.svg)
 ![David](https://img.shields.io/david/MrCerealKiller/seedlink.svg)
 ![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/MrCerealKiller/seedlink.svg)
 
