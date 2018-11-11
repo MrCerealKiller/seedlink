@@ -131,7 +131,8 @@ module.exports.removeSystemById = function(id, callback) {
     } else {
       // Remove all of the children input sectors
       system.inputSectors.forEach(function(sector) {
-        ISector.removeISectorById(sector, function(err) {
+        console.log(ISector == null || ISector == undefined);
+        ISector.getISectorById(sector, function(err) {
           if (err) {
             throw err;
           }

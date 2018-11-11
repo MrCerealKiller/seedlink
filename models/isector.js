@@ -62,7 +62,7 @@ module.exports.getISectorByName = function(name, callback) {
   ISector.findOne(query, callback);
 };
 
-module.exports.getSectorsByType = function(type, callback) {
+module.exports.getISectorsByType = function(type, callback) {
   var query = {type: type};
   ISector.find(query, callback);
 }

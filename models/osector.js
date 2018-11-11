@@ -34,7 +34,7 @@ const oSectorSchema = mongoose.Schema({
       'Water',
       'Lights',
       'Fans',
-      'Recirculating'
+      'Pump'
     ]
   },
   key: {
@@ -67,7 +67,7 @@ module.exports.getOSectorByName = function(name, callback) {
   OSector.findOne(query, callback);
 };
 
-module.exports.getSectorsByType = function(type, callback) {
+module.exports.getOSectorsByType = function(type, callback) {
   var query = {type: type};
   OSector.find(query, callback);
 }
