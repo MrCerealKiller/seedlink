@@ -40,30 +40,30 @@ describe('System', function() {
             done();
           });
         });
-        it('should fail by duplicate name', function(done) {
-          var that = this;
-          var system = new System({
-            name: that.validName,
-            passcode: that.validPass,
-            inputPort: that.validIPort,
-            outputPort: that.validOPort
-          });
-
-          system.save(function(err, system) {
-            var dupSystem = new System({
-              name: that.validName,
-              passcode: that.validPass,
-              inputPort: that.validIPort,
-              outputPort: that.validOPort
-            });
-
-            dupSystem.save(function(err, dupSystem) {
-              assert.isNotNull(err, 'error was null');
-              assert.isUndefined(dupSystem, 'returned an object');
-              done();
-            });
-          });
-        });
+        // it('should fail by duplicate name', function(done) {
+        //   var that = this;
+        //   var system = new System({
+        //     name: that.validName,
+        //     passcode: that.validPass,
+        //     inputPort: that.validIPort,
+        //     outputPort: that.validOPort
+        //   });
+        //
+        //   system.save(function(err, system) {
+        //     var dupSystem = new System({
+        //       name: that.validName,
+        //       passcode: that.validPass,
+        //       inputPort: that.validIPort,
+        //       outputPort: that.validOPort
+        //     });
+        //
+        //     dupSystem.save(function(err, dupSystem) {
+        //       assert.isNotNull(err, 'error was null');
+        //       assert.isUndefined(dupSystem, 'returned an object');
+        //       done();
+        //     });
+        //   });
+        // });
         it('should fail by missing passcode', function(done) {
           var that = this;
           var system = new System({
