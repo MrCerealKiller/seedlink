@@ -1,6 +1,6 @@
 # Options for running the Mocha unit Tests
 # See Mocha documentation for more info
 
+--full-trace
 --recursive
 --exit
---ui=tdd
