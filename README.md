@@ -1,4 +1,4 @@
-# Seedlink
+# Seedlink Server
 
 ![Travis (.com)](https://img.shields.io/travis/com/MrCerealKiller/seedlink/master.svg)
 ![David](https://img.shields.io/david/MrCerealKiller/seedlink.svg)
@@ -8,12 +8,16 @@
 IoT Solution for Automated home garden / hydroponics system 🌱
 
 ## Description
-This is an IoT application built on the MEAN stack that manages an automated garden
-/ hydroponics system. Key features include:
-- Scheduled Events (ex: watering or lighting schedule)
-- Input-Triggered Events (ex: low soil moisture triggers water event)
-- Interface to configure the software system
-- Dashboard to view up-to-date information about your system
+This is a server that you can configure to run your Seedlink automated garden.
+You can then use our Seedlink website (in production), Google Home Application
+(in production), or your own frontend to interact with the server.
+
+Some notable features are:
+- Creating and updating a virtual hardware configuration
+- Interfacing with the hardware system through USB
+- Setting Scheduled Events (ex: watering or lighting schedule)
+- Setting Input-Triggered Events (ex: low soil moisture triggers water event)
+- Provide an API to get information from your sensors
 
 ## Installation
 ### Dependencies
