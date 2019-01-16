@@ -16,7 +16,7 @@ const System    = require('../models/system');
 const ISector   = require('../models/isector');
 const IEvent    = require('../models/ievent');
 const OSector   = require('../models/osector');
-const OEvent    = require('../models/oevent');
+const TEvent    = require('../models/tevent');
 
 // System ----------------------------------------------------------------------
 router.route('/system')
@@ -382,7 +382,7 @@ function addOutputSector(req, res) {
     system: req.body.system,
     type: req.body.type,
     key: req.body.key,
-    oEvents: req.body.oEvents
+    tEvents: req.body.tEvents
   });
 
   OSector.addOSector(newSector, function(err, sector) {
@@ -411,7 +411,7 @@ function updateOutputSector(req, res) {
     name: req.body.name,
     type: req.body.type,
     key: req.body.key,
-    oEvents: req.body.oEvents
+    tEvents: req.body.tEvents
   });
 
   OSector.updateOSector(update, function(err, sector) {
@@ -472,42 +472,42 @@ function deleteOutputSector(req, res) {
 }
 
 // Output Events ---------------------------------------------------------------
-router.route('/system/output/event')
+router.route('/system/timed/event')
   .get(function(req, res, next) {
-    getOutputEvent(req,res);
+    getTimedEvent(req,res);
   })
   .post(function(req, res, next) {
-    addOutputEvent(req, res);
+    addTimedEvent(req, res);
   })
   .put(function(req, res, next) {
-    updateOutputEvent(req, res);
+    updateTimedEvent(req, res);
   })
   .delete(function(req, res, next) {
-    deleteOutputEvent(req, res);
+    deleteTimedEvent(req, res);
   });
 
-function getOutputEvent(req, res) {
+function getTimedEvent(req, res) {
   var id = req.headers.id;
 
   if (id != null && id != undefined && id != "") {
-    OEvent.getOEventById(id, function(err, oEvent) {
+    TEvent.getTEventById(id, function(err, tEvent) {
       if (err) {
         res.json({
           success: false,
           msg: ('Could not retrieve the event. Error: ' + err),
-          oEvent: undefined
+          tEvent: undefined
         });
-      } else if (oEvent == null) {
+      } else if (tEvent == null) {
         res.json({
           success: false,
           msg: ('Could not retrieve the event. Error: ID not found'),
-          oEvent: undefined
+          tEvent: undefined
         });
       } else {
         res.json({
           success: true,
           msg: 'Retrieved the requested event',
-          oEvent: oEvent
+          tEvent: tEvent
         });
       }
     });
@@ -515,27 +515,26 @@ function getOutputEvent(req, res) {
     res.json({
       success: false,
       msg: ('This request requires a valid ID'),
-      oEvent: undefined
+      tEvent: undefined
     });
   }
 }
 
-function addOutputEvent(req, res) {
-  var newEvent = new OEvent({
+function addTimedEvent(req, res) {
+  var newEvent = new TEvent({
     sector: req.body.sector,
     tag: req.body.tag,
-    start: req.body.start,
-    duration: req.body.duration,
-    interval: req.body.interval
+    schedule: req.body.schedule,
+    duration: req.body.duration
   });
 
-  OEvent.addOEvent(newEvent, function(err, oEvent) {
+  TEvent.addTEvent(newEvent, function(err, tEvent) {
     if (err) {
       res.json({
         success: false,
         msg: 'Could not add the event. Error: ' + err
       });
-    } else if (oEvent == null) {
+    } else if (tEvent == null) {
       res.json({
         success: false,
         msg: 'Could not add the event. Error: ID not found'
@@ -543,28 +542,27 @@ function addOutputEvent(req, res) {
     } else {
       res.json({
         success: true,
-        msg: oEvent.tag + ' was saved'
+        msg: tEvent.tag + ' was saved'
       });
     }
   });
 }
 
-function updateOutputEvent(req, res) {
-  var update = new OEvent({
+function updateTimedEvent(req, res) {
+  var update = new TEvent({
     _id: req.body._id,
     tag: req.body.tag,
-    start: req.body.start,
-    duration: req.body.duration,
-    interval: req.body.interval
+    schedule: req.body.schedule,
+    duration: req.body.duration
   });
 
-  OEvent.updateOEvent(update, function(err, oEvent) {
+  TEvent.updateTEvent(update, function(err, tEvent) {
     if (err) {
       res.json({
         success: false,
         msg: 'Could not update the event. Error: ' + err
       });
-    } else if (oEvent == null) {
+    } else if (tEvent == null) {
       res.json({
         success: false,
         msg: 'Could not update the event. Error: ID not found'
@@ -572,34 +570,34 @@ function updateOutputEvent(req, res) {
     } else {
       res.json({
         success: true,
-        msg: oEvent.tag + ' was saved'
+        msg: tEvent.tag + ' was saved'
       });
     }
   });
 }
 
-function deleteOutputEvent(req, res) {
+function deleteTimedEvent(req, res) {
   var id = req.headers.id;
 
-  OEvent.detachOEventById(id, function(err, oEvent) {
+  TEvent.detachTEventById(id, function(err, tEvent) {
     if (err) {
       res.json({
         success: false,
         msg: 'Could not detach the event. Error: ' + err
       });
-    } else if (oEvent == null) {
+    } else if (tEvent == null) {
       res.json({
         success: false,
         msg: 'Could not detach the event. Error: ID not found'
       });
     } else {
-      OEvent.removeOEventById(id, function(err, oEvent) {
+      TEvent.removeTEventById(id, function(err, tEvent) {
         if (err) {
           res.json({
             success: false,
             msg: 'Could not delete the event. Error: ' + err
           });
-        } else if (oEvent == null) {
+        } else if (tEvent == null) {
           res.json({
             success: false,
             msg: 'Could not delete the event. Error: internal error'
@@ -607,7 +605,7 @@ function deleteOutputEvent(req, res) {
         } else {
           res.json({
             success: true,
-            msg: oEvent.tag + ' was deleted'
+            msg: tEvent.tag + ' was deleted'
           });
         }
       });
