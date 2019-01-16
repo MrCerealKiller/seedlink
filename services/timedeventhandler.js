@@ -11,7 +11,7 @@ const schedule = require('node-schedule');
 // Local Dependencies ----------------------------------------------------------
 const db_config = require('../config/database.js');
 const System    = require('../models/system');
-const OEvent    = require('../models/oevent');
+const TEvent    = require('../models/tevent');
 
 // Global Variables ------------------------------------------------------------
 var jobs = {};
@@ -25,7 +25,7 @@ module.exports.loadDbJobs = function(id) {
       console.error('Error - System wasn\'t found');
     } else {
       system.outputSectors.forEach(function(sector) {
-        OEvent.getSectorOEvents(sector, function(err, events) {
+        TEvent.getSectorTEvents(sector, function(err, events) {
           if (err) {
             console.error('Error:\n' + err);
           } else if (systems == null) {
