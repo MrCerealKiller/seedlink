@@ -209,7 +209,7 @@ describe('Output Sector', function() {
                               'object was not of type OSector');
             System.getSystemById(that.systemId.toString(), function(err, system) {
               assert.equal(system.outputSectors.length, 1,
-                           'expected only one event in parent');
+                           'expected only one sector in parent');
               assert.equal(system.outputSectors[0].toString(), sector._id,
                            'id was not properly added to parent system');
               done();
@@ -386,7 +386,7 @@ describe('Output Sector', function() {
         type: that.initType,
         key: that.initKey,
         iEvents: [that.fakeEvent1],
-        oEvents: [that.fakeEvent1]
+        tEvents: [that.fakeEvent1]
       });
 
       newSector.save(function(err, sector) {
@@ -407,7 +407,7 @@ describe('Output Sector', function() {
             type: that.finType,
             key: that.finKey,
             iEvents: [that.fakeEvent2],
-            oEvents: [that.fakeEvent2]
+            tEvents: [that.fakeEvent2]
           });
 
           OSector.updateOSector(unknownSector, function(err, ret) {
@@ -428,7 +428,7 @@ describe('Output Sector', function() {
             type: that.finType,
             key: that.finKey,
             iEvents: [that.fakeEvent2],
-            oEvents: [that.fakeEvent2]
+            tEvents: [that.fakeEvent2]
           });
 
           OSector.updateOSector(validSector, function(err, ret) {
@@ -454,7 +454,7 @@ describe('Output Sector', function() {
             assert.equal(ret.iEvents[0],
                          that.fakeEvent2,
                          'iEvents unchanged');
-            assert.equal(ret.oEvents[0],
+            assert.equal(ret.tEvents[0],
                          that.fakeEvent2,
                          'oEvents unchanged');
             done();

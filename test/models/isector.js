@@ -209,7 +209,7 @@ describe('Input Sector', function() {
                               'object was not of type ISector');
             System.getSystemById(that.systemId, function(err, system) {
               assert.equal(system.inputSectors.length, 1,
-                           'expected only one event in parent');
+                           'expected only one sector in parent');
               assert.equal(system.inputSectors[0].toString(), sector._id,
                            'id was not properly added to parent system');
               done();
