@@ -15,7 +15,7 @@ const System = require('../../models/system');
 const OSector = require('../../models/osector');
 
 // Test Suite ------------------------------------------------------------------
-describe('Output Event', function() {
+describe('Timed Event', function() {
 
     beforeEach('creating test system', function(done) {
       var that = this;
@@ -124,6 +124,7 @@ describe('Output Event', function() {
               done();
             });
           });
+        });
 
         context('Valid', function() {
           it('should pass due to valid input (Water)', function(done) {
@@ -149,8 +150,15 @@ describe('Output Event', function() {
                            'unexpected sector property');
               assert.equal(tEvent.tag, newTEvent.tag,
                            'unexpected tag property');
-              assert.equal(tEvent.schedule, newTEvent.schedule,
-                           'unexpected schedule property');
+              assert.equal(tEvent.schedule.dayOfWeek.toString(),
+                           newTEvent.schedule.dayOfWeek.toString(),
+                           'unexpected dayOfWeek property');
+              assert.equal(tEvent.schedule.hour,
+                           newTEvent.schedule.hour,
+                           'unexpected hour property');
+              assert.equal(tEvent.schedule.minute,
+                           newTEvent.schedule.minute,
+                           'unexpected minute property');
               assert.equal(tEvent.duration, newTEvent.duration,
                            'unexpected duration property');
               done();
@@ -350,7 +358,7 @@ describe('Output Event', function() {
           dayOfWeek: [2,3,4],
           hour: 20,
           minute: 30
-        },;
+        };
         this.initDuration  = 61;
         this.finDuration   = 60;
 
@@ -417,9 +425,15 @@ describe('Output Event', function() {
               assert.equal(ret.tag,
                            that.finTag,
                            'tag was unchanged');
-              assert.equal(ret.schedule,
-                           that.finSched,
-                           'schedule was unchanged');
+              assert.equal(ret.schedule.dayOfWeek.toString(),
+                           that.finSched.dayOfWeek.toString(),
+                           'unexpected dayOfWeek property');
+              assert.equal(ret.schedule.hour,
+                           that.finSched.hour,
+                           'unexpected hour property');
+              assert.equal(ret.schedule.minute,
+                           that.finSched.minute,
+                           'unexpected minute property');
               assert.equal(ret.duration,
                            that.finDuration,
                            'duration was unchanged');

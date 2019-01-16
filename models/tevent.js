@@ -48,7 +48,7 @@ const tEventSchema = mongoose.Schema({
   },
 }, {timestamps: true});
 
-const tEvent = module.exports = mongoose.model('TimedEvent', tEventSchema);
+const TEvent = module.exports = mongoose.model('TimedEvent', tEventSchema);
 
 // Get Events ------------------------------------------------------------------
 module.exports.getTEventById = function(id, callback) {

@@ -45,13 +45,13 @@ before('Connecting to test database', function(done) {
 beforeEach('Clear Database', function(done) {
   const iEvents = mongoose.connection.collections.inputevents;
   const iSectors = mongoose.connection.collections.inputsectors;
-  const oEvents = mongoose.connection.collections.outputevents;
+  const tEvents = mongoose.connection.collections.timedevents;
   const oSectors = mongoose.connection.collections.outputsectors;
   const systems = mongoose.connection.collections.systems;
 
   iEvents.drop(function() {
     iSectors.drop(function() {
-      oEvents.drop(function() {
+      tEvents.drop(function() {
         oSectors.drop(function() {
           systems.drop(function() {
             done();
