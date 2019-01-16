@@ -8,7 +8,7 @@
 // Imports ---------------------------------------------------------------------
 const mongoose = require('mongoose');
 const System   = require('./system');
-const OEvent   = require('./oevent');
+const TEvent   = require('./tevent');
 const IEvent   = require('./ievent');
 
 // Create Models ---------------------------------------------------------------
@@ -41,13 +41,12 @@ const oSectorSchema = mongoose.Schema({
     type: Number,
     required: true,
     min: [0, 'The key must be 0 or higher'],
-    max: [54, 'Even an Arduino Mega doesn\'t have that many pins...'],
     unique: true,
     dropDups: true
   },
-  oEvents: [{
+  tEvents: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'OutputEvent'
+    ref: 'TimedEvent'
   }],
   iEvents: [{
     type: mongoose.Schema.Types.ObjectId,
@@ -115,7 +114,7 @@ module.exports.updateOSector = function(sector, callback) {
       dbSector.name = sector.name;
       dbSector.type = sector.type;
       dbSector.key = sector.key;
-      dbSector.oEvents = sector.oEvents;
+      dbSector.tEvents = sector.tEvents;
       dbSector.iEvents = sector.iEvents;
 
       dbSector.save(callback);
@@ -171,8 +170,8 @@ module.exports.removeOSectorById = function(id, callback) {
 
     } else {
       // Remove all of the child output events
-      sector.oEvents.forEach(function(oEvent) {
-        OEvent.removeOEventById(oEvent, function(err) {
+      sector.tEvents.forEach(function(tEvent) {
+        TEvent.removeTEventById(tEvent, function(err) {
           if (err) {
             throw err;
           }
