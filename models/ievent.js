@@ -1,8 +1,8 @@
 /**
- * @file Model for Output Events as stored on the database
+ * @file Model for Input Events as stored on the database
  * @author Jeremy Mallette
  * @version 0.0.0
- * @module Models/InputSectorEvent
+ * @module Models/InputEvent
  */
 
 // Imports ---------------------------------------------------------------------

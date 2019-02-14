@@ -10,7 +10,8 @@
 // ######################################
 
 // Constants -------------------------------------------------------------------
-const _PORT = 3000;
+const _PORT   = 3000;
+const _SYS_ID = '5be16a873dde9a64dbedac38';
 
 // Imports ---------------------------------------------------------------------
 const express       = require('express');
@@ -26,6 +27,7 @@ const path          = require('path');
 const indexRouter   = require('./routes/index');
 const usersRouter   = require('./routes/users');
 const db            = require('./config/database');
+const tEventHandler = require('./services/timedeventhandler');
 
 // Paths -----------------------------------------------------------------------
 var staticPath = path.join(__dirname, 'public');
@@ -43,6 +45,9 @@ mongoose.Promise = bluebird;
 
 mongoose.connection.on('connected', function() {
     console.log('Sucessfully connected to database\n');
+
+    console.log('Initializing Timed Event Jobs...');
+    tEventHandler.initDbJobs((process.env.SYS_ID || _SYS_ID));
 });
 
 mongoose.connection.on('error', function(err) {

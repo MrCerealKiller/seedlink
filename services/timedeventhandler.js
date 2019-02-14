@@ -17,14 +17,15 @@ const TEvent    = require('../models/tevent');
 var jobs = {};
 
 // Load Jobs from the Database -------------------------------------------------
-module.exports.loadDbJobs = function(id) {
+module.exports.initDbJobs = function(id) {
   System.getSystemById(id, function(err, system) {
     if (err) {
       console.error('Error:\n' + err);
-    } else if (systems == null) {
+    } else if (system == null) {
       console.error('Error - System wasn\'t found');
     } else {
       system.outputSectors.forEach(function(sector) {
+        var key = sector.key;
         TEvent.getSectorTEvents(sector, function(err, events) {
           if (err) {
             console.error('Error:\n' + err);
@@ -32,8 +33,9 @@ module.exports.loadDbJobs = function(id) {
             console.error('Error - No events were found');
           } else {
             events.forEach(function(e) {
-              createJob(e.tag, e.dayOfWeek, e.hour, e.minute, e.duration);
+              createJob(e.tag, key, e.schedule, e.duration);
             });
+            console.log('Done');
           }
         });
       });
@@ -42,28 +44,35 @@ module.exports.loadDbJobs = function(id) {
 };
 
 // Schedule a Job --------------------------------------------------------------
-module.exports.createJob = function(key, dayOfWeek, hour, minute, duration) {
+module.exports.createJob = function(tag, key, eSchedule, duration) {
   var rule = new schedule.RecurrenceRule();
 
   // Set the recurrence rule:
   // Day of week, hour, and minute are the priority for this system
-  rule.dayOfWeek = dayOfWeek;
-  rule.hour = hour;
-  rule.minute = minute;
+  rule.dayOfWeek = eSchedule.dayOfWeek;
+  rule.hour = eSchedule.hour;
+  rule.minute = eSchedule.minute;
 
-  var job = schedule.scheduleJob(rule, function(){
+  var job = schedule.scheduleJob(rule, function() {
     /**
      *
      * Eventually put method logic here
      *
      */
-    console.log('Test: ' + key);
+    var ts = new Date().toLocaleString({ hour12: false});
+    console.log('[' + ts + ']\t' + tag);
   });
 
-  jobs[key] = job;
+  jobs[tag] = job;
 };
 
 // Cancel a Job ----------------------------------------------------------------
-module.exports.cancelJob = function(key) {
-  jobs[key].cancel();
+module.exports.cancelAllJobs = function() {
+  jobs.forEach(function(job) {
+    job.cancel();
+  });
+};
+
+module.exports.cancelJob = function(tag) {
+  jobs[tag].cancel();
 };
